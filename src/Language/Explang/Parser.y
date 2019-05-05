@@ -77,10 +77,10 @@ Inspection : identifier { identifierValue $1 }
 Binding :: { Binding }
 Binding : { Any }
  | symbol { (Named . symbolValue) $1 }
- | like symbol { (Like . symbolValue) $2 }
  | something like symbol { (Like . symbolValue) $3 }
- | distinct of symbol { (Except . symbolValue) $3 }
+ | like symbol { (Like . symbolValue) $2 } -- relaxed syntax
  | something distinct of symbol { (Except . symbolValue) $4 }
+ | distinct of symbol { (Except . symbolValue) $3 } -- relaxed syntax
  | any of openParen Symbols closeParen  { (AnyOf . map symbolValue) $4 }
 
 Symbols :: { [Token] }
@@ -89,24 +89,27 @@ Symbols : symbol { [$1] }
 
 Matcher :: { Matcher }
 Matcher : { Unmatching }
-  | Predicates { Matching $1 }
+  | with Predicate { Matching [$2] }
+  | with openParen Predicates closeParen { Matching $3 }
+  | that openParen Expectation closeParen { Matching [That $3] } -- relaxed syntax
 
 Predicates :: { [Predicate] }
 Predicates : Predicate { [$1] }
-  | Predicate and Predicates { ($1:$3) }
+  | Predicate comma Predicates { ($1:$3) }
 
 Predicate :: { Predicate }
-Predicate : with number { IsNumber . numberValue $ $2 }
-  | with string { IsString . stringValue $ $2 }
-  | with char { IsChar . charValue $ $2 }
-  | with symbol { IsSymbol . symbolValue $ $2 }
-  | with true { IsTrue }
-  | with false { IsFalse }
-  | with self { IsSelf }
-  | with math { IsMath }
-  | with logic { IsLogic }
-  | with nil { IsNil }
-  | with something that openParen Expectation closeParen { That $5 }
+Predicate : number { IsNumber . numberValue $ $1 }
+  | string { IsString . stringValue $ $1 }
+  | char { IsChar . charValue $ $1 }
+  | symbol { IsSymbol . symbolValue $ $1 }
+  | true { IsTrue }
+  | false { IsFalse }
+  | self { IsSelf }
+  | math { IsMath }
+  | logic { IsLogic }
+  | nil { IsNil }
+  | something that openParen Expectation closeParen { That $4 }
+  | that openParen Expectation closeParen { That $3 } -- relaxed syntax
 
 Count :: { Count }
 Count : { AnyCount }

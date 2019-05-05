@@ -85,21 +85,31 @@ spec = do
     test "within `bar` returns with math" (simpleMatching (Scoped "bar") "returns" Any (Matching [IsMath]))
     test "within `bar` returns with logic" (simpleMatching (Scoped "bar") "returns" Any (Matching [IsLogic]))
 
-    test "within `bar` calls `foo` with 0 and with self" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsNumber 0, IsSelf]))
-    test "within `bar` calls `foo` with \"hello\" and with self" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsString "hello", IsSelf]))
-    test "within `bar` calls `foo` with `hello` and with self" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsSymbol "hello", IsSelf]))
-    test "within `bar` calls `foo` with 'a' and with self" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsChar 'a', IsSelf]))
-    test "within `bar` calls `foo` with true and with self" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsTrue, IsSelf]))
-    test "within `bar` calls `foo` with false and with self" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsFalse, IsSelf]))
-    test "within `bar` calls `foo` with nil and with self" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsNil, IsSelf]))
-    test "within `bar` calls `foo` with self and with self" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsSelf, IsSelf]))
-    test "within `bar` calls `foo` with math and with self" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsMath, IsSelf]))
-    test "within `bar` calls `foo` with logic and with self" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsLogic, IsSelf]))
+    test "within `bar` calls `foo` with (0, self)" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsNumber 0, IsSelf]))
+    test "within `bar` calls `foo` with (\"hello\", self)" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsString "hello", IsSelf]))
+    test "within `bar` calls `foo` with (`hello`, self)" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsSymbol "hello", IsSelf]))
+    test "within `bar` calls `foo` with ('a', self)" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsChar 'a', IsSelf]))
+    test "within `bar` calls `foo` with (true, self)" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsTrue, IsSelf]))
+    test "within `bar` calls `foo` with (false, self)" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsFalse, IsSelf]))
+    test "within `bar` calls `foo` with (nil, self)" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsNil, IsSelf]))
+    test "within `bar` calls `foo` with (self, self)" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsSelf, IsSelf]))
+    test "within `bar` calls `foo` with (math, self)" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsMath, IsSelf]))
+    test "within `bar` calls `foo` with (logic, self)" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsLogic, IsSelf]))
 
-    test "calls `foo` with self and with something that (returns with math)" (
+    test "calls `foo` with something that (returns with math)" (
+      simpleMatching Unscoped "calls" (Named "foo") (Matching [That (simpleMatching Unscoped "returns" Any (Matching [IsMath]) )]))
+
+    test "declares `foo` that (returns with math)" (
+      simpleMatching Unscoped "declares" (Named "foo") (Matching [That (simpleMatching Unscoped "returns" Any (Matching [IsMath]) )]))
+
+    test "calls `foo` with (self, something that (returns with math))" (
       simpleMatching Unscoped "calls" (Named "foo") (Matching [IsSelf, That (simpleMatching Unscoped "returns" Any (Matching [IsMath]) )]))
 
-    test "calls `foo` with self and with something that (declares method `baz`)" (
+    test "calls `foo` with (self, that (returns with math))" (
+      simpleMatching Unscoped "calls" (Named "foo") (Matching [IsSelf, That (simpleMatching Unscoped "returns" Any (Matching [IsMath]) )]))
+
+
+    test "calls `foo` with (self, something that (declares method `baz`))" (
       simpleMatching Unscoped "calls" (Named "foo") (Matching [IsSelf, That (simple Unscoped "declares method" (Named "baz"))]))
 
   describe "parseExpectations" $ do
