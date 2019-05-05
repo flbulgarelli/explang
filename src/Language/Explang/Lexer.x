@@ -67,6 +67,7 @@ tokens :-
   "("   { symbolToken TOpenParen }
   ")"   { symbolToken TCloseParen }
   ","   { symbolToken TComma }
+  ";"   { symbolToken TSemi }
 
   "and" { symbolToken TAnd }
   "any" { symbolToken TAny }
@@ -95,8 +96,7 @@ tokens :-
 
 {
 data Token
-  = TOpenParen
-  | TAnd
+  = TAnd
   | TAny
   | TAt
   | TChar { charValue :: Char }
@@ -106,6 +106,7 @@ data Token
   | TEOF
   | TExactly
   | TFalse
+  | TIdentifier { identifierValue :: String }
   | TIntransitively
   | TLeast
   | TLike
@@ -116,11 +117,12 @@ data Token
   | TNot
   | TNumber { numberValue :: Double }
   | TOf
+  | TOpenParen
   | TSelf
+  | TSemi
   | TSomething
   | TString { stringValue :: String }
   | TSymbol { symbolValue :: String }
-  | TIdentifier { identifierValue :: String }
   | TThat
   | TTimes
   | TTrue

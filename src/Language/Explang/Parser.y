@@ -38,6 +38,7 @@ import           Control.Monad.Error
   of { TOf {} }
   openParen   { TOpenParen {} }
   self { TSelf {} }
+  semi { TSemi {} }
   something { TSomething {} }
   string { TString {} }
   symbol { TSymbol {} }
@@ -49,6 +50,10 @@ import           Control.Monad.Error
 
 
 %%
+Expectations :: { [Expectation] }
+Expectations : { [] }
+  | Expectation { [$1] }
+  | Expectation semi Expectations { $1:$3 }
 
 Expectation :: { Expectation }
 Expectation : Flags Scope Negation Inspection Binding Matcher Count { Expectation $1 $2 $3 $4 $5 $6 $7 }

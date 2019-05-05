@@ -3,10 +3,6 @@ module ExplangSpec (spec) where
 import Test.Hspec hiding (Expectation)
 import Language.Explang
 
-run :: String -> Expectation
-run = either error id . parseExpectation
-
-test code expectation = it (code ++ " shouldBe " ++ show expectation) (run code `shouldBe` expectation)
 
 simple scope inspection binding = simpleMatching scope inspection binding Unmatching
 simpleNegated scope inspection binding = (Expectation noFlags scope True inspection binding Unmatching AnyCount)
@@ -16,6 +12,9 @@ simpleMatching scope inspection binding matcher = (Expectation noFlags scope Fal
 spec :: Spec
 spec = do
   describe "parseExpectation" $ do
+    let run = parseExpectation
+    let test code expectation = it (code ++ " shouldBe " ++ show expectation) (run code `shouldBe` expectation)
+
     test "calls" (simple Unscoped "calls" Any)
     test "calls `foo`" (simple Unscoped "calls" (Named "foo"))
     test "calls something like `foo`" (simple Unscoped "calls" (Like "foo"))
@@ -92,9 +91,22 @@ spec = do
     test "within `bar` calls `foo` with math and with self" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsMath, IsSelf]))
     test "within `bar` calls `foo` with logic and with self" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsLogic, IsSelf]))
 
-
     test "calls `foo` with self and with something that (returns with math)" (
       simpleMatching Unscoped "calls" (Named "foo") (Matching [IsSelf, That (simpleMatching Unscoped "returns" Any (Matching [IsMath]) )]))
 
     test "calls `foo` with self and with something that (declares method `baz`)" (
       simpleMatching Unscoped "calls" (Named "foo") (Matching [IsSelf, That (simple Unscoped "declares method" (Named "baz"))]))
+
+  describe "parseExpectations" $ do
+    let run = parseExpectations
+    let test code expectation = it (code ++ " shouldBe " ++ show expectation) (run code `shouldBe` expectation)
+
+    test "declares class `Baz`" [simple Unscoped "declares class" (Named "Baz")]
+    test "declares class `Baz`;" [simple Unscoped "declares class" (Named "Baz")]
+    test "declares class `Baz`;\n" [simple Unscoped "declares class" (Named "Baz")]
+    test "declares class `Baz`;\nwithin `Baz` sends `foo`" [simple Unscoped "declares class" (Named "Baz"), simple (Scoped "Baz") "sends" (Named "foo")]
+    test "declares class `Baz`;\nwithin `Baz` sends `foo`;" [simple Unscoped "declares class" (Named "Baz"), simple (Scoped "Baz") "sends" (Named "foo")]
+    test "declares class `Baz`;\n\
+         \\n\
+         \within `Baz`\n\
+         \sends `foo`;\n" [simple Unscoped "declares class" (Named "Baz"), simple (Scoped "Baz") "sends" (Named "foo")]
