@@ -114,6 +114,42 @@ Count : { AnyCount }
   | at most number times { AtMost . round . numberValue $ $3 }
   | exactly number times { Exactly . round . numberValue $ $2 }
 
+
 {
-parseError x = throwError ("!Parse Error: " ++ show x)
+parseError token = throwError ("Parse Error: " ++ m token)
+
+m (TIdentifier id) = "Unexpected keyword " ++ id
+m (TString v) = "string " ++ show v ++ " is not expected here"
+m (TSymbol v) = "symbol " ++ v ++ " is not expected here"
+m (TNumber v) = "number " ++ show v ++ " is not expected here"
+m (TChar v) = "char " ++ show v ++ " is not expected here"
+m TEOF = "Unexpected end of file"
+m TSemi = "Unexpected ;"
+m TComma = "Unexpected ,"
+m TOpenParen = "Unexpected )"
+m TCloseParen = "Unexpected ("
+m TAnd = "and is not expected here"
+m TAny = "any is not expected here"
+m TAt = "at is not expected here"
+m TDistinct = "distinct is not expected here"
+m TExactly = "exactly is not expected here"
+m TFalse = "false is not expected here"
+m TIntransitively = "intransitively is not expected here"
+m TLeast = "least is not expected here"
+m TLike = "like is not expected here"
+m TLogic = "logic is not expected here"
+m TMath = "math is not expected here"
+m TMost = "most is not expected here"
+m TNil = "nil is not expected here"
+m TNot = "not is not expected here"
+m TOf = "of is not expected here"
+m TSelf = "self is not expected here"
+m TSomething = "something is not expected here"
+m TThat = "that is not expected here"
+m TTimes = "times is not expected here"
+m TTrue = "true is not expected here"
+m TWith = "with is not expected here"
+m TWithin = "within is not expected here"
+m x =  "Unexpected " ++ show x
+
 }

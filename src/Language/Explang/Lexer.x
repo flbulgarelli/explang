@@ -148,7 +148,7 @@ readToken = do
     s <- get
     case alexScan s 0 of
       AlexEOF -> return TEOF
-      AlexError _ -> throwError "!Lexical error"
+      AlexError _ -> throwError ("Lexical error")
       AlexSkip inp' _ -> do
         put inp'
         readToken
