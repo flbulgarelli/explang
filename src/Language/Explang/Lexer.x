@@ -84,6 +84,7 @@ tokens :-
   "nil" { symbolToken TNil }
   "not" { symbolToken TNot }
   "of" { symbolToken TOf }
+  "or" { symbolToken TOr }
   "self" { symbolToken TSelf }
   "something" { symbolToken TSomething }
   "that" { symbolToken TThat }
@@ -118,6 +119,7 @@ data Token
   | TNumber { numberValue :: Double }
   | TOf
   | TOpenParen
+  | TOr
   | TSelf
   | TSemi
   | TSomething

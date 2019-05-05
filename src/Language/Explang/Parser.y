@@ -37,6 +37,7 @@ import           Control.Monad.Error
   number { TNumber {} }
   of { TOf {} }
   openParen   { TOpenParen {} }
+  or { TOr {} }
   self { TSelf {} }
   semi { TSemi {} }
   something { TSomething {} }
@@ -48,6 +49,9 @@ import           Control.Monad.Error
   with { TWith {} }
   within { TWithin {} }
 
+%left or
+%left and
+%right not
 
 %%
 Expectations :: { [Expectation] }
@@ -56,7 +60,7 @@ Expectations : { [] }
   | Expectation semi Expectations { $1:$3 }
 
 Expectation :: { Expectation }
-Expectation : Flags Scope Negation Inspection Binding Matcher Count { Expectation $1 $2 $3 $4 $5 $6 $7 }
+Expectation : Flags Scope Query Count { Expectation $1 $2 $3 $4 }
 
 Flags :: { Flags }
 Flags : { noFlags }
@@ -66,9 +70,12 @@ Scope :: { Scope }
 Scope : { Unscoped }
   | within symbol { (Scoped . symbolValue) $2 }
 
-Negation :: { Bool }
-Negation : { False }
- | not { True }
+Query :: { Query }
+Query : Inspection Binding Matcher { Inspection $1 $2 $3 }
+  | not Query { Not $2 }
+  | Query or Query { Or $1 $3 }
+  | Query and Query { And $1 $3 }
+  | openParen Query closeParen { $2 }
 
 Inspection :: { String }
 Inspection : identifier { identifierValue $1 }
@@ -146,6 +153,7 @@ m TMost = "most is not expected here"
 m TNil = "nil is not expected here"
 m TNot = "not is not expected here"
 m TOf = "of is not expected here"
+m TOr = "or is not expected here"
 m TSelf = "self is not expected here"
 m TSomething = "something is not expected here"
 m TThat = "that is not expected here"

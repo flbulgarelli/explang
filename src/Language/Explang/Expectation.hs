@@ -8,6 +8,7 @@ module Language.Explang.Expectation (
   Matcher (..),
   Binding (..),
   Predicate (..),
+  Query (..),
   noFlags,
   intransitiveFlag) where
 
@@ -17,12 +18,17 @@ data Expectation =
   Expectation {
     flags :: Flags,
     scope :: Scope,
-    negated :: Bool,
-    inspection :: String,
-    binding :: Binding,
-    matcher :: Matcher,
+    query :: Query,
     count :: Count
   } deriving (Eq, Show, Generic)
+
+data Query
+  = Inspection { inspection :: String, binding :: Binding, matcher :: Matcher }
+  | Not Query
+  | Or Query Query
+  | And Query Query
+  deriving (Eq, Show, Generic)
+
 
 data Scope
   = Unscoped
