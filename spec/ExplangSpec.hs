@@ -33,6 +33,11 @@ spec = do
     test "intransitively calls something distinct of `foo`" (Expectation intransitiveFlag Unscoped False "calls" (Except "foo") Unmatching AnyCount)
     test "intransitively calls any of (`foo`, `bar`, `baz`)" (Expectation intransitiveFlag Unscoped False "calls" (AnyOf ["foo", "bar", "baz"]) Unmatching AnyCount)
 
+    test "intransitively declares class like `Foo`" (Expectation intransitiveFlag Unscoped False "declares class" (Like "Foo") Unmatching AnyCount)
+    test "intransitively declares class distinct of `Foo`" (Expectation intransitiveFlag Unscoped False "declares class" (Except "Foo") Unmatching AnyCount)
+    test "intransitively declares method like `foo`" (Expectation intransitiveFlag Unscoped False "declares method" (Like "foo") Unmatching AnyCount)
+    test "intransitively declares method distinct of `foo`" (Expectation intransitiveFlag Unscoped False "declares method" (Except "foo") Unmatching AnyCount)
+
     test "intransitively not calls" (Expectation intransitiveFlag Unscoped True "calls" Any Unmatching AnyCount)
     test "intransitively not calls `foo`" (Expectation intransitiveFlag Unscoped True "calls" (Named "foo") Unmatching AnyCount)
     test "intransitively not calls something like `foo`" (Expectation intransitiveFlag Unscoped True "calls" (Like "foo") Unmatching AnyCount)

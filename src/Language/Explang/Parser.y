@@ -77,7 +77,9 @@ Inspection : identifier { identifierValue $1 }
 Binding :: { Binding }
 Binding : { Any }
  | symbol { (Named . symbolValue) $1 }
+ | like symbol { (Like . symbolValue) $2 }
  | something like symbol { (Like . symbolValue) $3 }
+ | distinct of symbol { (Except . symbolValue) $3 }
  | something distinct of symbol { (Except . symbolValue) $4 }
  | any of openParen Symbols closeParen  { (AnyOf . map symbolValue) $4 }
 
