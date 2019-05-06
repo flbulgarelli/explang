@@ -16,6 +16,7 @@ import GHC.Generics
 
 data Expectation =
   Expectation {
+    description :: String,
     flags :: Flags,
     scope :: Scope,
     query :: Query,

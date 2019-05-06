@@ -14,7 +14,11 @@ parseExpectation :: String -> Expectation
 parseExpectation = head . parseExpectations
 
 parseExpectations :: String -> [Expectation]
-parseExpectations = either error id . parseExpectations'
+parseExpectations = zipWith overrideDescription [0..] . either error id . parseExpectations'
+    where
+      overrideDescription :: Int -> Expectation -> Expectation
+      overrideDescription number e@Expectation { description = ""} = e { description = "E" ++ show number }
+      overrideDescription _      e                                 = e
 
 parseExpectations' :: String -> Either String [Expectation]
 parseExpectations' = evalP parse . encode

@@ -22,6 +22,7 @@ import           Control.Monad.Error
   char { TChar {} }
   closeParen  { TCloseParen {} }
   comma { TComma {} }
+  describe { TDescribe {} }
   distinct { TDistinct {} }
   exactly { TExactly {} }
   false { TFalse {} }
@@ -60,7 +61,11 @@ Expectations : { [] }
   | Expectation semi Expectations { $1:$3 }
 
 Expectation :: { Expectation }
-Expectation : Flags Scope Query Count { Expectation $1 $2 $3 $4 }
+Expectation : Describe Flags Scope Query Count { Expectation $1 $2 $3 $4 $5 }
+
+Describe :: { String }
+Describe : { "" }
+  | describe string { stringValue $2 }
 
 Flags :: { Flags }
 Flags : { noFlags }
