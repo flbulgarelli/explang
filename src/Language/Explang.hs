@@ -1,25 +1,30 @@
 module Language.Explang (
   parseExpectation,
-  parseExpectations,
-  parseExpectations',
-  module Language.Explang.Expectation) where
+  parseTest,
+  parseTests,
+  parseTests',
+  module Language.Explang.Test) where
 
 import Codec.Binary.UTF8.String (encode)
 import Language.Explang.Parser (parse)
 import Language.Explang.Lexer (evalP)
 
-import Language.Explang.Expectation
+import Language.Explang.Test
+import Language.Explang.Expectation (Expectation)
 
 parseExpectation :: String -> Expectation
-parseExpectation = head . parseExpectations
+parseExpectation = expectation . parseTest . ("test:"++)
 
-parseExpectations :: String -> [Expectation]
-parseExpectations = zipWith overrideDescription [0..] . either error id . parseExpectations'
+parseTest :: String -> Test
+parseTest = head . parseTests
+
+parseTests :: String -> [Test]
+parseTests = zipWith overrideName [0..] . either error id . parseTests'
     where
-      overrideDescription :: Int -> Expectation -> Expectation
-      overrideDescription number e@Expectation { description = ""} = e { description = "E" ++ show number }
-      overrideDescription _      e                                 = e
+      overrideName :: Int -> Test -> Test
+      overrideName number e@Test { name = ""} = e { name = "E" ++ show number }
+      overrideName _      e                   = e
 
-parseExpectations' :: String -> Either String [Expectation]
-parseExpectations' = evalP parse . encode
+parseTests' :: String -> Either String [Test]
+parseTests' = evalP parse . encode
 

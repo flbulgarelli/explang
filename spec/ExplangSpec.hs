@@ -2,21 +2,22 @@ module ExplangSpec (spec) where
 
 import Test.Hspec hiding (Expectation)
 import Language.Explang
+import Language.Explang.Expectation
 
 
 simple scope inspection binding = simpleMatching scope inspection binding Unmatching
-simpleNegated scope inspection binding = (Expectation "E0" noFlags scope (Not (Inspection inspection binding Unmatching)) AnyCount)
-simpleCount scope inspection binding count = (Expectation "E0" noFlags scope (Inspection inspection binding Unmatching) count)
-simpleIntransitive scope inspection binding = (Expectation "E0" intransitiveFlag scope (Inspection inspection binding Unmatching) AnyCount)
-intransitiveNegated scope inspection binding = (Expectation "E0" intransitiveFlag scope (Not (Inspection inspection binding Unmatching)) AnyCount)
-simpleMatching scope inspection binding matcher = (Expectation "E0" noFlags scope (Inspection inspection binding matcher) AnyCount)
-simpleDescribe name scope inspection binding = (Expectation name noFlags scope (Inspection inspection binding Unmatching) AnyCount)
-unnamed e = e { description = "" }
+simpleNegated scope inspection binding = (Expectation noFlags scope (Not (Inspection inspection binding Unmatching)) AnyCount)
+simpleCount scope inspection binding count = (Expectation noFlags scope (Inspection inspection binding Unmatching) count)
+simpleIntransitive scope inspection binding = (Expectation intransitiveFlag scope (Inspection inspection binding Unmatching) AnyCount)
+intransitiveNegated scope inspection binding = (Expectation intransitiveFlag scope (Not (Inspection inspection binding Unmatching)) AnyCount)
+simpleMatching scope inspection binding matcher = (Expectation noFlags scope (Inspection inspection binding matcher) AnyCount)
+
+simpleTest name scope inspection binding = Test name (simple scope inspection binding)
 
 spec :: Spec
 spec = do
   describe "parseExpectation" $ do
-    let run = parseExpectation
+    let run = parseExpectation :: String -> Expectation
     let test code expectation = it ("test " ++ code ++ " shouldBe " ++ show expectation) (run code `shouldBe` expectation)
 
     test "calls" (simple Unscoped "calls" Any)
@@ -70,9 +71,9 @@ spec = do
     test "within `bar` (calls `foo`) or (calls `foo`)" (run "within `bar` calls `foo` or calls `foo`")
     test "within `bar` (calls `foo` or calls `foo`)" (run "within `bar` calls `foo` or calls `foo`")
 
-    test "within `bar` calls `foo` or calls `baz`" (Expectation "E0" noFlags (Scoped "bar") (Or (Inspection "calls" (Named "foo") Unmatching) (Inspection "calls" (Named "baz") Unmatching)) AnyCount)
-    test "within `bar` calls `foo` and calls `baz`" (Expectation "E0" noFlags (Scoped "bar") (And (Inspection "calls" (Named "foo") Unmatching) (Inspection "calls" (Named "baz") Unmatching)) AnyCount)
-    test "within `bar` calls `foo` or calls `baz` at least 2 times" (Expectation "E0" noFlags (Scoped "bar") (Or (Inspection "calls" (Named "foo") Unmatching) (Inspection "calls" (Named "baz") Unmatching)) (AtLeast 2))
+    test "within `bar` calls `foo` or calls `baz`" (Expectation noFlags (Scoped "bar") (Or (Inspection "calls" (Named "foo") Unmatching) (Inspection "calls" (Named "baz") Unmatching)) AnyCount)
+    test "within `bar` calls `foo` and calls `baz`" (Expectation noFlags (Scoped "bar") (And (Inspection "calls" (Named "foo") Unmatching) (Inspection "calls" (Named "baz") Unmatching)) AnyCount)
+    test "within `bar` calls `foo` or calls `baz` at least 2 times" (Expectation noFlags (Scoped "bar") (Or (Inspection "calls" (Named "foo") Unmatching) (Inspection "calls" (Named "baz") Unmatching)) (AtLeast 2))
     test "within `bar` calls `a` and calls `b` or calls `c`" (run "within `bar` (calls `a` and calls `b`) or calls `c`")
     test "within `bar` calls `a` and calls `b` or calls `c` or calls `d`" (run "within `bar` ((calls `a` and calls `b`) or calls `c`) or calls `d`")
     test "within `bar` calls `a` and calls `b` or calls `c` and calls `d`" (run "within `bar` (calls `a` and calls `b`) or (calls `c` and calls `d`)")
@@ -114,82 +115,79 @@ spec = do
     test "within `bar` calls `foo` with (logic, self)" (simpleMatching (Scoped "bar") "calls" (Named "foo") (Matching [IsLogic, IsSelf]))
 
     test "calls `foo` with something that (returns with math)" (
-      simpleMatching Unscoped "calls" (Named "foo") (Matching [That (unnamed $ simpleMatching Unscoped "returns" Any (Matching [IsMath]) )]))
+      simpleMatching Unscoped "calls" (Named "foo") (Matching [That (simpleMatching Unscoped "returns" Any (Matching [IsMath]) )]))
 
     test "declares `foo` that (returns with math)" (
-      simpleMatching Unscoped "declares" (Named "foo") (Matching [That (unnamed $ simpleMatching Unscoped "returns" Any (Matching [IsMath]) )]))
+      simpleMatching Unscoped "declares" (Named "foo") (Matching [That (simpleMatching Unscoped "returns" Any (Matching [IsMath]) )]))
 
     test "calls `foo` with (self, something that (returns with math))" (
-      simpleMatching Unscoped "calls" (Named "foo") (Matching [IsSelf, That (unnamed $ simpleMatching Unscoped "returns" Any (Matching [IsMath]) )]))
+      simpleMatching Unscoped "calls" (Named "foo") (Matching [IsSelf, That (simpleMatching Unscoped "returns" Any (Matching [IsMath]) )]))
 
     test "calls `foo` with (self, that (returns with math))" (
-      simpleMatching Unscoped "calls" (Named "foo") (Matching [IsSelf, That (unnamed $ simpleMatching Unscoped "returns" Any (Matching [IsMath]))]))
-
+      simpleMatching Unscoped "calls" (Named "foo") (Matching [IsSelf, That (simpleMatching Unscoped "returns" Any (Matching [IsMath]))]))
 
     test "calls `foo` with (self, something that (declares method `baz`))" (
-      simpleMatching Unscoped "calls" (Named "foo") (Matching [IsSelf, That (unnamed $ simple Unscoped "declares method" (Named "baz"))]))
+      simpleMatching Unscoped "calls" (Named "foo") (Matching [IsSelf, That (simple Unscoped "declares method" (Named "baz"))]))
 
-  describe "parseExpectations" $ do
-    let run = parseExpectations
+  describe "parseTests" $ do
+    let run = parseTests
     let test code expectation = it ("test " ++ code ++ " shouldBe " ++ show expectation) (run code `shouldBe` expectation)
 
-    test "declares class `Baz`" [simpleDescribe "E0" Unscoped "declares class" (Named "Baz")]
-    test "declares class `Baz`;" [simpleDescribe "E0" Unscoped "declares class" (Named "Baz")]
-    test "declares class `Baz`;\n" [simpleDescribe "E0" Unscoped "declares class" (Named "Baz")]
+    test "test: declares class `Baz`" [simpleTest "E0" Unscoped "declares class" (Named "Baz")]
+    test "test: declares class `Baz`;" [simpleTest "E0" Unscoped "declares class" (Named "Baz")]
+    test "test: declares class `Baz`;\n" [simpleTest "E0" Unscoped "declares class" (Named "Baz")]
 
-    test "declares class `Baz`;\nwithin `Baz` sends `foo`" [
-      simpleDescribe "E0" Unscoped "declares class" (Named "Baz"),
-      simpleDescribe "E1" (Scoped "Baz") "sends" (Named "foo")]
-    test "declares class `Baz`;\nwithin `Baz` sends `foo`;" [
-      simpleDescribe "E0" Unscoped "declares class" (Named "Baz"),
-      simpleDescribe "E1" (Scoped "Baz") "sends" (Named "foo")]
-    test "declares class `Baz`;\n\
-         \\n\
-         \within `Baz`\n\
+    test "test: declares class `Baz`;\ntest: within `Baz` sends `foo`" [
+      simpleTest "E0" Unscoped "declares class" (Named "Baz"),
+      simpleTest "E1" (Scoped "Baz") "sends" (Named "foo")]
+    test "test: declares class `Baz`;\ntest: within `Baz` sends `foo`;" [
+      simpleTest "E0" Unscoped "declares class" (Named "Baz"),
+      simpleTest "E1" (Scoped "Baz") "sends" (Named "foo")]
+    test "test: declares class `Baz`;\n\
+         \test : within `Baz`\n\
          \sends `foo`;\n" [
-           simpleDescribe "E0" Unscoped "declares class" (Named "Baz"),
-           simpleDescribe "E1" (Scoped "Baz") "sends" (Named "foo")]
+           simpleTest "E0" Unscoped "declares class" (Named "Baz"),
+           simpleTest "E1" (Scoped "Baz") "sends" (Named "foo")]
 
-    test "describe \"a test\":\n\
-         \  declares class `Baz`" [simpleDescribe "a test" Unscoped "declares class" (Named "Baz")]
-    test "describe \"a test\":\n\
-         \  declares class `Baz`;" [simpleDescribe "a test" Unscoped "declares class" (Named "Baz")]
-    test "describe \"a test\":\n\
-         \  declares class `Baz`;\n" [simpleDescribe "a test" Unscoped "declares class" (Named "Baz")]
+    test "test \"a test\":\n\
+         \  declares class `Baz`" [simpleTest "a test" Unscoped "declares class" (Named "Baz")]
+    test "test \"a test\":\n\
+         \  declares class `Baz`;" [simpleTest "a test" Unscoped "declares class" (Named "Baz")]
+    test "test \"a test\":\n\
+         \  declares class `Baz`;\n" [simpleTest "a test" Unscoped "declares class" (Named "Baz")]
 
-    test "describe \"a test\":\n\
+    test "test \"a test\":\n\
          \  declares class `Baz`;\n\
-         \describe \"another test\":\n\
+         \test \"another test\":\n\
          \  within `Baz` sends `foo`" [
-      simpleDescribe "a test" Unscoped "declares class" (Named "Baz"),
-      simpleDescribe "another test" (Scoped "Baz") "sends" (Named "foo")]
-    test "describe \"a test\":\n\
+      simpleTest "a test" Unscoped "declares class" (Named "Baz"),
+      simpleTest "another test" (Scoped "Baz") "sends" (Named "foo")]
+    test "test \"a test\":\n\
          \  declares class `Baz`;\n\
-         \describe \"another test\":\n\
+         \test \"another test\":\n\
          \  within `Baz` sends `foo`;" [
-      simpleDescribe "a test" Unscoped "declares class" (Named "Baz"),
-      simpleDescribe "another test" (Scoped "Baz") "sends" (Named "foo")]
-    test "describe \"a test\":\n\
+      simpleTest "a test" Unscoped "declares class" (Named "Baz"),
+      simpleTest "another test" (Scoped "Baz") "sends" (Named "foo")]
+    test "test \"a test\":\n\
          \  declares class `Baz`;\n\
-         \describe \"another test\":\n\
+         \test \"another test\":\n\
          \  within `Baz`\n\
          \  sends `foo`;\n" [
-           simpleDescribe "a test" Unscoped "declares class" (Named "Baz"),
-           simpleDescribe "another test" (Scoped "Baz") "sends" (Named "foo")]
+           simpleTest "a test" Unscoped "declares class" (Named "Baz"),
+           simpleTest "another test" (Scoped "Baz") "sends" (Named "foo")]
 
   describe "handles errors" $ do
-    let run = either id (error.show) . parseExpectations'
+    let run = either id (error.show) . parseTests'
     let test code expectation = it ("test " ++ code ++ " shouldBe " ++ show expectation) (run code `shouldBe` expectation)
 
-    test "declares class `Baz" "Lexical error"
-    test "declares class `Baz` exoctly 3 times" "Parse Error: Unexpected keyword exoctly"
-    test "declares class `Baz` exactly 3 time" "Parse Error: Unexpected keyword time"
-    test "declares class `Baz`\n within `Baz` sends `foo`" "Parse Error: within is not expected here"
-    test "declares class of distinct `Baz`\n" "Parse Error: of is not expected here"
-    test "declares class distinct `Baz`\n" "Parse Error: symbol Baz is not expected here"
-    test "declares class `Baz` 3 times" "Parse Error: number 3.0 is not expected here"
-    test "declares class `Baz` not exactly 3 times" "Parse Error: not is not expected here"
-    test "declares class `Baz`;\n\
-         \\n\
-         \Within `Baz`\n\
+    test "test: declares class `Baz" "Lexical error"
+    test "test: declares class `Baz` exoctly 3 times" "Parse Error: Unexpected keyword exoctly"
+    test "test: declares class `Baz` exactly 3 time" "Parse Error: Unexpected keyword time"
+    test "test: declares class `Baz`\n within `Baz` sends `foo`" "Parse Error: within is not expected here"
+    test "test: declares class of distinct `Baz`\n" "Parse Error: of is not expected here"
+    test "test: declares class distinct `Baz`\n" "Parse Error: symbol Baz is not expected here"
+    test "test: declares class `Baz` 3 times" "Parse Error: number 3.0 is not expected here"
+    test "test: declares class `Baz` not exactly 3 times" "Parse Error: not is not expected here"
+    test "test: declares class `Baz`;\n\
+         \test: Within `Baz`\n\
          \sends `foo`;\n" "Parse Error: Unexpected keyword sends"

@@ -2,6 +2,7 @@
 module Language.Explang.Parser (parse) where
 
 import           Language.Explang.Expectation
+import           Language.Explang.Test
 import           Language.Explang.Lexer (Token( ..) )
 import qualified Language.Explang.Lexer as L
 
@@ -23,7 +24,6 @@ import           Control.Monad.Error
   closeParen  { TCloseParen {} }
   colon { TColon {} }
   comma { TComma {} }
-  describe { TDescribe {} }
   distinct { TDistinct {} }
   exactly { TExactly {} }
   false { TFalse {} }
@@ -45,6 +45,7 @@ import           Control.Monad.Error
   something { TSomething {} }
   string { TString {} }
   symbol { TSymbol {} }
+  test { TTest {} }
   that { TThat {} }
   times { TTimes {} }
   true { TTrue {} }
@@ -56,17 +57,17 @@ import           Control.Monad.Error
 %right not
 
 %%
-Expectations :: { [Expectation] }
-Expectations : { [] }
-  | Expectation { [$1] }
-  | Expectation semi Expectations { $1:$3 }
+Tests :: { [Test] }
+Tests : { [] }
+  | Test { [$1] }
+  | Test semi Tests { $1:$3 }
+
+Test :: { Test }
+Test : test colon Expectation { Test "" $3 }
+  | test string colon Expectation { Test (stringValue $2) $4 }
 
 Expectation :: { Expectation }
-Expectation : Describe Flags Scope Query Count { Expectation $1 $2 $3 $4 $5 }
-
-Describe :: { String }
-Describe : { "" }
-  | describe string colon { stringValue $2 }
+Expectation : Flags Scope Query Count { Expectation $1 $2 $3 $4 }
 
 Flags :: { Flags }
 Flags : { noFlags }

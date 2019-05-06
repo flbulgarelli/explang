@@ -73,7 +73,7 @@ tokens :-
   "and" { symbolToken TAnd }
   "any" { symbolToken TAny }
   "at" { symbolToken TAt }
-  "describe" { symbolToken TDescribe }
+  "test" { symbolToken TTest }
   "distinct" { symbolToken TDistinct }
   "exactly" { symbolToken TExactly }
   "false" { symbolToken TFalse }
@@ -104,9 +104,8 @@ data Token
   | TAt
   | TChar { charValue :: Char }
   | TCloseParen
-  | TComma
   | TColon
-  | TDescribe
+  | TComma
   | TDistinct
   | TEOF
   | TExactly
@@ -129,6 +128,7 @@ data Token
   | TSomething
   | TString { stringValue :: String }
   | TSymbol { symbolValue :: String }
+  | TTest
   | TThat
   | TTimes
   | TTrue
