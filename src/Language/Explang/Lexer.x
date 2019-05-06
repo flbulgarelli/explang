@@ -68,6 +68,7 @@ tokens :-
   ")"   { symbolToken TCloseParen }
   ","   { symbolToken TComma }
   ";"   { symbolToken TSemi }
+  ":"   { symbolToken TColon }
 
   "and" { symbolToken TAnd }
   "any" { symbolToken TAny }
@@ -104,6 +105,7 @@ data Token
   | TChar { charValue :: Char }
   | TCloseParen
   | TComma
+  | TColon
   | TDescribe
   | TDistinct
   | TEOF

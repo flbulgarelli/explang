@@ -21,6 +21,7 @@ import           Control.Monad.Error
   at { TAt {} }
   char { TChar {} }
   closeParen  { TCloseParen {} }
+  colon { TColon {} }
   comma { TComma {} }
   describe { TDescribe {} }
   distinct { TDistinct {} }
@@ -65,7 +66,7 @@ Expectation : Describe Flags Scope Query Count { Expectation $1 $2 $3 $4 $5 }
 
 Describe :: { String }
 Describe : { "" }
-  | describe string { stringValue $2 }
+  | describe string colon { stringValue $2 }
 
 Flags :: { Flags }
 Flags : { noFlags }

@@ -17,7 +17,7 @@ spec :: Spec
 spec = do
   describe "parseExpectation" $ do
     let run = parseExpectation
-    let test code expectation = it (code ++ " shouldBe " ++ show expectation) (run code `shouldBe` expectation)
+    let test code expectation = it ("test " ++ code ++ " shouldBe " ++ show expectation) (run code `shouldBe` expectation)
 
     test "calls" (simple Unscoped "calls" Any)
     test "calls `foo`" (simple Unscoped "calls" (Named "foo"))
@@ -131,7 +131,7 @@ spec = do
 
   describe "parseExpectations" $ do
     let run = parseExpectations
-    let test code expectation = it (code ++ " shouldBe " ++ show expectation) (run code `shouldBe` expectation)
+    let test code expectation = it ("test " ++ code ++ " shouldBe " ++ show expectation) (run code `shouldBe` expectation)
 
     test "declares class `Baz`" [simpleDescribe "E0" Unscoped "declares class" (Named "Baz")]
     test "declares class `Baz`;" [simpleDescribe "E0" Unscoped "declares class" (Named "Baz")]
@@ -150,9 +150,36 @@ spec = do
            simpleDescribe "E0" Unscoped "declares class" (Named "Baz"),
            simpleDescribe "E1" (Scoped "Baz") "sends" (Named "foo")]
 
+    test "describe \"a test\":\n\
+         \  declares class `Baz`" [simpleDescribe "a test" Unscoped "declares class" (Named "Baz")]
+    test "describe \"a test\":\n\
+         \  declares class `Baz`;" [simpleDescribe "a test" Unscoped "declares class" (Named "Baz")]
+    test "describe \"a test\":\n\
+         \  declares class `Baz`;\n" [simpleDescribe "a test" Unscoped "declares class" (Named "Baz")]
+
+    test "describe \"a test\":\n\
+         \  declares class `Baz`;\n\
+         \describe \"another test\":\n\
+         \  within `Baz` sends `foo`" [
+      simpleDescribe "a test" Unscoped "declares class" (Named "Baz"),
+      simpleDescribe "another test" (Scoped "Baz") "sends" (Named "foo")]
+    test "describe \"a test\":\n\
+         \  declares class `Baz`;\n\
+         \describe \"another test\":\n\
+         \  within `Baz` sends `foo`;" [
+      simpleDescribe "a test" Unscoped "declares class" (Named "Baz"),
+      simpleDescribe "another test" (Scoped "Baz") "sends" (Named "foo")]
+    test "describe \"a test\":\n\
+         \  declares class `Baz`;\n\
+         \describe \"another test\":\n\
+         \  within `Baz`\n\
+         \  sends `foo`;\n" [
+           simpleDescribe "a test" Unscoped "declares class" (Named "Baz"),
+           simpleDescribe "another test" (Scoped "Baz") "sends" (Named "foo")]
+
   describe "handles errors" $ do
     let run = either id (error.show) . parseExpectations'
-    let test code expectation = it (code ++ " shouldBe " ++ show expectation) (run code `shouldBe` expectation)
+    let test code expectation = it ("test " ++ code ++ " shouldBe " ++ show expectation) (run code `shouldBe` expectation)
 
     test "declares class `Baz" "Lexical error"
     test "declares class `Baz` exoctly 3 times" "Parse Error: Unexpected keyword exoctly"
