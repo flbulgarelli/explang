@@ -77,7 +77,6 @@ tokens :-
   "distinct" { symbolToken TDistinct }
   "exactly" { symbolToken TExactly }
   "false" { symbolToken TFalse }
-  "intransitively" { symbolToken TIntransitively }
   "least" { symbolToken TLeast }
   "like" { symbolToken TLike }
   "logic" { symbolToken TLogic }
@@ -93,6 +92,7 @@ tokens :-
   "times" { symbolToken TTimes }
   "true" { symbolToken TTrue }
   "with" { symbolToken TWith }
+  "through" { symbolToken TThrough }
   "within" { symbolToken TWithin }
 
   @identifier { mkIdentifier }
@@ -111,7 +111,6 @@ data Token
   | TExactly
   | TFalse
   | TIdentifier { identifierValue :: String }
-  | TIntransitively
   | TLeast
   | TLike
   | TLogic
@@ -130,6 +129,7 @@ data Token
   | TSymbol { symbolValue :: String }
   | TTest
   | TThat
+  | TThrough
   | TTimes
   | TTrue
   | TWith

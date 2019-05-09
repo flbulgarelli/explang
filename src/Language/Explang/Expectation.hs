@@ -3,20 +3,16 @@
 module Language.Explang.Expectation (
   Expectation (..),
   Scope (..),
-  Flags (..),
   Count (..),
   Matcher (..),
   Binding (..),
   Predicate (..),
-  Query (..),
-  noFlags,
-  intransitiveFlag) where
+  Query (..)) where
 
 import GHC.Generics
 
 data Expectation =
   Expectation {
-    flags :: Flags,
     scope :: Scope,
     query :: Query,
     count :: Count
@@ -31,11 +27,10 @@ data Query
 
 
 data Scope
-  = Unscoped
-  | Scoped { context :: String }
+  = Anywhere
+  | Within { context :: String }
+  | Through { context :: String }
   deriving (Eq, Show, Generic)
-
-data Flags = Flags { intransitive :: Bool } deriving (Eq, Show, Generic)
 
 data Binding
   = Any
@@ -71,10 +66,4 @@ data Predicate
   | IsMath
   | IsLogic
   deriving (Eq, Show, Generic)
-
-noFlags :: Flags
-noFlags = Flags False
-
-intransitiveFlag :: Flags
-intransitiveFlag = Flags True
 

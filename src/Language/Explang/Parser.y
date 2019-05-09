@@ -28,7 +28,6 @@ import           Control.Monad.Error
   exactly { TExactly {} }
   false { TFalse {} }
   identifier { TIdentifier {} }
-  intransitively { TIntransitively {} }
   least { TLeast {} }
   like { TLike {} }
   logic { TLogic {} }
@@ -47,6 +46,7 @@ import           Control.Monad.Error
   symbol { TSymbol {} }
   test { TTest {} }
   that { TThat {} }
+  through { TThrough {} }
   times { TTimes {} }
   true { TTrue {} }
   with { TWith {} }
@@ -67,15 +67,12 @@ Test : test colon Expectation { Test "" $3 }
   | test string colon Expectation { Test (stringValue $2) $4 }
 
 Expectation :: { Expectation }
-Expectation : Flags Scope Query Count { Expectation $1 $2 $3 $4 }
-
-Flags :: { Flags }
-Flags : { noFlags }
-  | intransitively { intransitiveFlag }
+Expectation : Scope Query Count { Expectation $1 $2 $3 }
 
 Scope :: { Scope }
-Scope : { Unscoped }
-  | within symbol { (Scoped . symbolValue) $2 }
+Scope : { Anywhere }
+  | within symbol { (Within . symbolValue) $2 }
+  | through symbol { (Through . symbolValue) $2 }
 
 Query :: { Query }
 Query : Inspection Binding Matcher { Inspection $1 $2 $3 }
@@ -141,17 +138,14 @@ m (TSymbol v) = "symbol " ++ v ++ " is not expected here"
 m (TNumber v) = "number " ++ show v ++ " is not expected here"
 m (TChar v) = "char " ++ show v ++ " is not expected here"
 m TEOF = "Unexpected end of file"
-m TSemi = "Unexpected ;"
-m TComma = "Unexpected ,"
-m TOpenParen = "Unexpected )"
-m TCloseParen = "Unexpected ("
 m TAnd = "and is not expected here"
 m TAny = "any is not expected here"
 m TAt = "at is not expected here"
+m TCloseParen = "Unexpected ("
+m TComma = "Unexpected ,"
 m TDistinct = "distinct is not expected here"
 m TExactly = "exactly is not expected here"
 m TFalse = "false is not expected here"
-m TIntransitively = "intransitively is not expected here"
 m TLeast = "least is not expected here"
 m TLike = "like is not expected here"
 m TLogic = "logic is not expected here"
@@ -160,10 +154,13 @@ m TMost = "most is not expected here"
 m TNil = "nil is not expected here"
 m TNot = "not is not expected here"
 m TOf = "of is not expected here"
+m TOpenParen = "Unexpected )"
 m TOr = "or is not expected here"
 m TSelf = "self is not expected here"
+m TSemi = "Unexpected ;"
 m TSomething = "something is not expected here"
 m TThat = "that is not expected here"
+m TThrough = "through is not expected here"
 m TTimes = "times is not expected here"
 m TTrue = "true is not expected here"
 m TWith = "with is not expected here"
