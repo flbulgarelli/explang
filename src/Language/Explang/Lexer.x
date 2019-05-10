@@ -69,30 +69,33 @@ tokens :-
   ","   { symbolToken TComma }
   ";"   { symbolToken TSemi }
   ":"   { symbolToken TColon }
+  "&&"  { symbolToken TCAnd }
+  "||"  { symbolToken TCOr }
+  "!"   { symbolToken TCNot }
+  "+"   { symbolToken TPlus }
+  ">="  { symbolToken TAtLeast }
+  "<="  { symbolToken TAtMost }
+  "="   { symbolToken TExactly }
 
   "and" { symbolToken TAnd }
   "any" { symbolToken TAny }
-  "at" { symbolToken TAt }
-  "test" { symbolToken TTest }
+  "count" { symbolToken TCount }
   "distinct" { symbolToken TDistinct }
-  "exactly" { symbolToken TExactly }
   "false" { symbolToken TFalse }
-  "least" { symbolToken TLeast }
   "like" { symbolToken TLike }
   "logic" { symbolToken TLogic }
   "math" { symbolToken TMath }
-  "most" { symbolToken TMost }
   "nil" { symbolToken TNil }
   "not" { symbolToken TNot }
   "of" { symbolToken TOf }
   "or" { symbolToken TOr }
   "self" { symbolToken TSelf }
   "something" { symbolToken TSomething }
+  "test" { symbolToken TTest }
   "that" { symbolToken TThat }
-  "times" { symbolToken TTimes }
+  "through" { symbolToken TThrough }
   "true" { symbolToken TTrue }
   "with" { symbolToken TWith }
-  "through" { symbolToken TThrough }
   "within" { symbolToken TWithin }
 
   @identifier { mkIdentifier }
@@ -101,11 +104,16 @@ tokens :-
 data Token
   = TAnd
   | TAny
-  | TAt
+  | TAtLeast
+  | TAtMost
+  | TCAnd
   | TChar { charValue :: Char }
   | TCloseParen
+  | TCNot
   | TColon
   | TComma
+  | TCOr
+  | TCount
   | TDistinct
   | TEOF
   | TExactly
@@ -115,13 +123,13 @@ data Token
   | TLike
   | TLogic
   | TMath
-  | TMost
   | TNil
   | TNot
   | TNumber { numberValue :: Double }
   | TOf
   | TOpenParen
   | TOr
+  | TPlus
   | TSelf
   | TSemi
   | TSomething
@@ -130,7 +138,6 @@ data Token
   | TTest
   | TThat
   | TThrough
-  | TTimes
   | TTrue
   | TWith
   | TWithin

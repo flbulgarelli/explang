@@ -2,59 +2,56 @@
 
 module Language.Explang.Expectation (
   Expectation (..),
-  Scope (..),
-  Count (..),
   Matcher (..),
-  Binding (..),
   Predicate (..),
-  Query (..)) where
+  Clause (..),
+  Query (..),
+  CQuery (..),
+  TQuery (..)) where
 
 import GHC.Generics
 
-data Expectation =
-  Expectation {
-    scope :: Scope,
-    query :: Query,
-    count :: Count
-  } deriving (Eq, Show, Generic)
+type Expectation = Query
 
 data Query
-  = Inspection { inspection :: String, binding :: Binding, matcher :: Matcher }
+  = Decontextualize CQuery
+  | Within String CQuery
+  | Through String CQuery
   | Not Query
-  | Or Query Query
   | And Query Query
+  | Or Query Query
   deriving (Eq, Show, Generic)
 
-
-data Scope
-  = Anywhere
-  | Within { context :: String }
-  | Through { context :: String }
+data CQuery
+  = Inspection String Predicate Matcher
+  | CNot CQuery
+  | CAnd CQuery CQuery
+  | COr CQuery CQuery
+  | AtLeast Int TQuery
+  | AtMost Int TQuery
+  | Exactly Int TQuery
   deriving (Eq, Show, Generic)
 
-data Binding
+data TQuery
+  = Plus TQuery TQuery
+  | Counter String Predicate Matcher
+  deriving (Eq, Show, Generic)
+
+data Predicate
   = Any
-  | Named { identifier :: String }
-  | Like { identifier :: String }
-  | Except { identifier :: String }
-  | AnyOf { identifiers :: [String] }
+  | Named String
+  | Like String
+  | Except String
+  | AnyOf [String]
   deriving (Eq, Show, Generic)
 
 data Matcher
   = Unmatching
-  | Matching { expectations :: [Predicate] }
+  | Matching [Clause]
   deriving (Eq, Show, Generic)
 
-data Count
-  = AnyCount
-  | AtLeast { times :: Int }
-  | AtMost { times :: Int }
-  | Exactly { times :: Int }
-  deriving (Eq, Show, Generic)
-
-
-data Predicate
-  = That { expectation :: Expectation }
+data Clause
+  = That Expectation
   | IsNumber Double
   | IsString String
   | IsSymbol String

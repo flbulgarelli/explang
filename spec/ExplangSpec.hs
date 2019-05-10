@@ -5,12 +5,17 @@ import Language.Explang
 import Language.Explang.Expectation
 
 
-simple scope inspection binding = simpleMatching scope inspection binding Unmatching
-simpleNegated scope inspection binding = (Expectation scope (Not (Inspection inspection binding Unmatching)) AnyCount)
-simpleCount scope inspection binding count = (Expectation scope (Inspection inspection binding Unmatching) count)
-simpleMatching scope inspection binding matcher = (Expectation scope (Inspection inspection binding matcher) AnyCount)
+simple inspection binding = simpleMatching inspection binding Unmatching
+simpleCount inspection binding count = Decontextualize (count (Counter inspection binding Unmatching))
+simpleCountWithin scope inspection binding count = Within scope (count (Counter inspection binding Unmatching))
 
-simpleTest name scope inspection binding = Test name (simple scope inspection binding)
+simpleNegated inspection binding = (Decontextualize (CNot (Inspection inspection binding Unmatching)))
+simpleNegatedWithin scope inspection binding = (Within scope (CNot (Inspection inspection binding Unmatching)))
+simpleNegatedThrough scope inspection binding = (Through scope (CNot (Inspection inspection binding Unmatching)))
+
+simpleThrough scope inspection binding = (Through scope (Inspection inspection binding Unmatching))
+simpleMatchingWithin scope inspection binding matcher = (Within scope (Inspection inspection binding matcher))
+simpleMatching inspection binding matcher = (Decontextualize (Inspection inspection binding matcher))
 
 spec :: Spec
 spec = do
@@ -18,161 +23,171 @@ spec = do
     let run = parseExpectation :: String -> Expectation
     let test code expectation = it ("test " ++ code ++ " shouldBe " ++ show expectation) (run code `shouldBe` expectation)
 
-    test "calls" (simple Anywhere "calls" Any)
-    test "calls `foo`" (simple Anywhere "calls" (Named "foo"))
-    test "calls something like `foo`" (simple Anywhere "calls" (Like "foo"))
-    test "calls something distinct of `foo`" (simple Anywhere "calls" (Except "foo"))
-    test "calls any of (`foo`, `bar`, `baz`)" (simple Anywhere "calls" (AnyOf ["foo", "bar", "baz"]))
+    test "calls" (simple "calls" Any)
+    test "calls `foo`" (simple "calls" (Named "foo"))
+    test "calls something like `foo`" (simple "calls" (Like "foo"))
+    test "calls something distinct of `foo`" (simple "calls" (Except "foo"))
+    test "calls any of (`foo`, `bar`, `baz`)" (simple "calls" (AnyOf ["foo", "bar", "baz"]))
 
-    test "not calls" (simpleNegated Anywhere "calls" Any)
-    test "not calls `foo`" (simpleNegated Anywhere "calls" (Named "foo"))
-    test "not calls something like `foo`" (simpleNegated Anywhere "calls" (Like "foo"))
-    test "not calls something distinct of `foo`" (simpleNegated Anywhere "calls" (Except "foo"))
-    test "not calls any of (`foo`, `bar`, `baz`)" (simpleNegated Anywhere "calls" (AnyOf ["foo", "bar", "baz"]))
+    test "! calls" (simpleNegated "calls" Any)
+    test "! calls `foo`" (simpleNegated "calls" (Named "foo"))
+    test "! calls something like `foo`" (simpleNegated "calls" (Like "foo"))
+    test "! calls something distinct of `foo`" (simpleNegated "calls" (Except "foo"))
+    test "! calls any of (`foo`, `bar`, `baz`)" (simpleNegated "calls" (AnyOf ["foo", "bar", "baz"]))
 
-    test "through `foobar` calls" (simple (Through "foobar") "calls" Any)
-    test "through `foobar` calls `foo`" (simple (Through "foobar") "calls" (Named "foo"))
-    test "through `foobar` calls something like `foo`" (simple (Through "foobar") "calls" (Like "foo"))
-    test "through `foobar` calls something distinct of `foo`" (simple (Through "foobar") "calls" (Except "foo"))
-    test "through `foobar` calls any of (`foo`, `bar`, `baz`)" (simple (Through "foobar") "calls" (AnyOf ["foo", "bar", "baz"]))
+    test "through `foobar` calls" (simpleThrough "foobar" "calls" Any)
+    test "through `foobar` calls `foo`" (simpleThrough "foobar" "calls" (Named "foo"))
+    test "through `foobar` calls something like `foo`" (simpleThrough "foobar" "calls" (Like "foo"))
+    test "through `foobar` calls something distinct of `foo`" (simpleThrough "foobar" "calls" (Except "foo"))
+    test "through `foobar` calls any of (`foo`, `bar`, `baz`)" (simpleThrough "foobar" "calls" (AnyOf ["foo", "bar", "baz"]))
 
-    test "declares class like `Foo`" (simple Anywhere "declares class" (Like "Foo"))
-    test "declares class distinct of `Foo`" (simple Anywhere "declares class" (Except "Foo"))
-    test "declares method like `foo`" (simple Anywhere "declares method" (Like "foo"))
-    test "declares method distinct of `foo`" (simple Anywhere "declares method" (Except "foo"))
+    test "declares class like `Foo`" (simple "declares class" (Like "Foo"))
+    test "declares class distinct of `Foo`" (simple "declares class" (Except "Foo"))
+    test "declares method like `foo`" (simple "declares method" (Like "foo"))
+    test "declares method distinct of `foo`" (simple "declares method" (Except "foo"))
 
-    test "through `foobar` not calls" (simpleNegated (Through "foobar") "calls" Any)
-    test "through `foobar` not calls `foo`" (simpleNegated (Through "foobar") "calls" (Named "foo"))
-    test "through `foobar` not calls something like `foo`" (simpleNegated (Through "foobar") "calls" (Like "foo"))
-    test "through `foobar` not calls something distinct of `foo`" (simpleNegated (Through "foobar") "calls" (Except "foo"))
-    test "through `foobar` not calls any of (`foo`, `bar`, `baz`)" (simpleNegated (Through "foobar") "calls" (AnyOf ["foo", "bar", "baz"]))
+    test "through `foobar` ! calls" (simpleNegatedThrough "foobar" "calls" Any)
+    test "through `foobar` ! calls `foo`" (simpleNegatedThrough "foobar" "calls" (Named "foo"))
+    test "through `foobar` ! calls something like `foo`" (simpleNegatedThrough "foobar" "calls" (Like "foo"))
+    test "through `foobar` ! calls something distinct of `foo`" (simpleNegatedThrough "foobar" "calls" (Except "foo"))
+    test "through `foobar` ! calls any of (`foo`, `bar`, `baz`)" (simpleNegatedThrough "foobar" "calls" (AnyOf ["foo", "bar", "baz"]))
 
-    test "through `bar` not calls" (simpleNegated (Through "bar") "calls" Any)
-    test "through `bar` not calls `foo`" (simpleNegated (Through "bar") "calls" (Named "foo"))
-    test "through `bar` not calls something like `foo`" (simpleNegated (Through "bar") "calls" (Like "foo"))
-    test "through `bar` not calls something distinct of `foo`" (simpleNegated (Through "bar") "calls" (Except "foo"))
-    test "through `bar` not calls any of (`foo`, `bar`, `baz`)" (simpleNegated (Through "bar") "calls" (AnyOf ["foo", "bar", "baz"]))
+    test "within `bar` ! calls" (simpleNegatedWithin "bar" "calls" Any)
+    test "within `bar` ! calls `foo`" (simpleNegatedWithin "bar" "calls" (Named "foo"))
+    test "within `bar` ! calls something like `foo`" (simpleNegatedWithin "bar" "calls" (Like "foo"))
+    test "within `bar` ! calls something distinct of `foo`" (simpleNegatedWithin "bar" "calls" (Except "foo"))
+    test "within `bar` ! calls any of (`foo`, `bar`, `baz`)" (simpleNegatedWithin "bar" "calls" (AnyOf ["foo", "bar", "baz"]))
 
-    test "within `bar` not calls" (simpleNegated (Within "bar") "calls" Any)
-    test "within `bar` not calls `foo`" (simpleNegated (Within "bar") "calls" (Named "foo"))
-    test "within `bar` not calls something like `foo`" (simpleNegated (Within "bar") "calls" (Like "foo"))
-    test "within `bar` not calls something distinct of `foo`" (simpleNegated (Within "bar") "calls" (Except "foo"))
-    test "within `bar` not calls any of (`foo`, `bar`, `baz`)" (simpleNegated (Within "bar") "calls" (AnyOf ["foo", "bar", "baz"]))
+    test "count (declares class `Baz`) = 3" (simpleCount "declares class" (Named "Baz") (Exactly 3))
 
-    test "within `bar` calls exactly 3 times" (simpleCount (Within "bar") "calls" Any (Exactly 3))
-    test "within `bar` calls `foo` exactly 3 times" (simpleCount (Within "bar") "calls" (Named "foo") (Exactly 3))
-    test "within `bar` calls something like `foo` exactly 3 times" (simpleCount (Within "bar") "calls" (Like "foo") (Exactly 3))
-    test "within `bar` calls something distinct of `foo` exactly 3 times" (simpleCount (Within "bar") "calls" (Except "foo") (Exactly 3))
-    test "within `bar` calls any of (`foo`, `bar`, `baz`) exactly 3 times" (simpleCount (Within "bar") "calls" (AnyOf ["foo", "bar", "baz"]) (Exactly 3))
+    test "not (within `bar` count (calls) = 3)" (Not (simpleCountWithin "bar" "calls" Any (Exactly 3)))
+
+    test "(within `f` calls) or (within `g` returns)" (Or (Within "f" (Inspection "calls" Any Unmatching)) (Within "g" (Inspection "returns" Any Unmatching)))
+    test "calls || returns" (Decontextualize (COr (Inspection "calls" Any Unmatching) (Inspection "returns" Any Unmatching)))
+    test "(calls) || (returns)" (run "calls || returns")
+
+    test "(within `f` calls) and (within `g` returns)" (And (Within "f" (Inspection "calls" Any Unmatching)) (Within "g" (Inspection "returns" Any Unmatching)))
+    test "calls && returns" (Decontextualize (CAnd (Inspection "calls" Any Unmatching) (Inspection "returns" Any Unmatching)))
+    test "(calls) && (returns)" (run "calls && returns")
+
+
+    test "count(calls) >= 3 && count(returns) >= 4" (Decontextualize (CAnd (AtLeast 3 (Counter "calls" Any Unmatching)) (AtLeast 4 (Counter "returns" Any Unmatching))))
+    test "(count(calls) >= 3) && (count(returns) >= 4)" (run "count(calls) >= 3 && count(returns) >= 4")
+
+    test "within `bar` count (calls) = 3" (simpleCountWithin "bar" "calls" Any (Exactly 3))
+    test "within `bar` count (calls `foo`) = 3" (simpleCountWithin "bar" "calls" (Named "foo") (Exactly 3))
+    test "within `bar` count (calls something like `foo`) = 3" (simpleCountWithin "bar" "calls" (Like "foo") (Exactly 3))
+    test "within `bar` count (calls something distinct of `foo`) = 3" (simpleCountWithin "bar" "calls" (Except "foo") (Exactly 3))
+    test "within `bar` count (calls any of (`foo`, `bar`, `baz`)) = 3" (simpleCountWithin "bar" "calls" (AnyOf ["foo", "bar", "baz"]) (Exactly 3))
 
     test "within `bar` (calls `foo`)" (run "within `bar` calls `foo`")
-    test "within `bar` (calls `foo`) or (calls `foo`)" (run "within `bar` calls `foo` or calls `foo`")
-    test "within `bar` (calls `foo` or calls `foo`)" (run "within `bar` calls `foo` or calls `foo`")
+    test "within `bar` (calls `foo`) || (calls `foo`)" (run "within `bar` calls `foo` || calls `foo`")
+    test "within `bar` (calls `foo` || calls `foo`)" (run "within `bar` calls `foo` || calls `foo`")
 
-    test "within `bar` calls `foo` or calls `baz`" (Expectation (Within "bar") (Or (Inspection "calls" (Named "foo") Unmatching) (Inspection "calls" (Named "baz") Unmatching)) AnyCount)
-    test "within `bar` calls `foo` and calls `baz`" (Expectation (Within "bar") (And (Inspection "calls" (Named "foo") Unmatching) (Inspection "calls" (Named "baz") Unmatching)) AnyCount)
-    test "within `bar` calls `foo` or calls `baz` at least 2 times" (Expectation (Within "bar") (Or (Inspection "calls" (Named "foo") Unmatching) (Inspection "calls" (Named "baz") Unmatching)) (AtLeast 2))
-    test "within `bar` calls `a` and calls `b` or calls `c`" (run "within `bar` (calls `a` and calls `b`) or calls `c`")
-    test "within `bar` calls `a` and calls `b` or calls `c` or calls `d`" (run "within `bar` ((calls `a` and calls `b`) or calls `c`) or calls `d`")
-    test "within `bar` calls `a` and calls `b` or calls `c` and calls `d`" (run "within `bar` (calls `a` and calls `b`) or (calls `c` and calls `d`)")
+    test "within `bar` calls `foo` || calls `baz`" (Within "bar" (COr (Inspection "calls" (Named "foo") Unmatching) (Inspection "calls" (Named "baz") Unmatching)))
+    test "within `bar` calls `foo` && calls `baz`" (Within "bar" (CAnd (Inspection "calls" (Named "foo") Unmatching) (Inspection "calls" (Named "baz") Unmatching)))
+    test "within `bar` count (calls `foo`) + count (calls `baz`) >= 2" (Within "bar" (AtLeast 2 (Plus (Counter "calls" (Named "foo") Unmatching) (Counter "calls" (Named "baz") Unmatching))))
+    test "within `bar` calls `a` && calls `b` || calls `c`" (run "within `bar` (calls `a` && calls `b`) || calls `c`")
+    test "within `bar` calls `a` && calls `b` || calls `c` || calls `d`" (run "within `bar` ((calls `a` && calls `b`) || calls `c`) || calls `d`")
+    test "within `bar` calls `a` && calls `b` || calls `c` && calls `d`" (run "within `bar` (calls `a` && calls `b`) || (calls `c` && calls `d`)")
 
-    test "declares body `foo` that (calls `baz` or calls `bar`)" (run "declares body `foo` with something that (calls `baz` or calls `bar`)")
+    test "declares body `foo` that (calls `baz` || calls `bar`)" (run "declares body `foo` with something that (calls `baz` || calls `bar`)")
 
-    test "within `bar` calls at least 3 times" (simpleCount (Within "bar") "calls" Any (AtLeast 3))
-    test "within `bar` calls `foo` at least 3 times" (simpleCount (Within "bar") "calls" (Named "foo") (AtLeast 3))
-    test "within `bar` calls something like `foo` at least 3 times" (simpleCount (Within "bar") "calls" (Like "foo") (AtLeast 3))
-    test "within `bar` calls something distinct of `foo` at least 3 times" (simpleCount (Within "bar") "calls" (Except "foo") (AtLeast 3))
-    test "within `bar` calls any of (`foo`, `bar`, `baz`) at least 3 times" (simpleCount (Within "bar") "calls" (AnyOf ["foo", "bar", "baz"]) (AtLeast 3))
+    test "within `bar` count (calls) >= 3" (simpleCountWithin "bar" "calls" Any (AtLeast 3))
+    test "within `bar` count (calls `foo`) >= 3" (simpleCountWithin "bar" "calls" (Named "foo") (AtLeast 3))
+    test "within `bar` count (calls something like `foo`) >= 3" (simpleCountWithin "bar" "calls" (Like "foo") (AtLeast 3))
+    test "within `bar` count (calls something distinct of `foo`) >= 3" (simpleCountWithin "bar" "calls" (Except "foo") (AtLeast 3))
+    test "within `bar` count (calls any of (`foo`, `bar`, `baz`)) >= 3" (simpleCountWithin "bar" "calls" (AnyOf ["foo", "bar", "baz"]) (AtLeast 3))
 
-    test "within `bar` calls at most 3 times" (simpleCount (Within "bar") "calls" Any (AtMost 3))
-    test "within `bar` calls `foo` at most 3 times" (simpleCount (Within "bar") "calls" (Named "foo") (AtMost 3))
-    test "within `bar` calls something like `foo` at most 3 times" (simpleCount (Within "bar") "calls" (Like "foo") (AtMost 3))
-    test "within `bar` calls something distinct of `foo` at most 3 times" (simpleCount (Within "bar") "calls" (Except "foo") (AtMost 3))
-    test "within `bar` calls any of (`foo`, `bar`, `baz`) at most 3 times" (simpleCount (Within "bar") "calls" (AnyOf ["foo", "bar", "baz"]) (AtMost 3))
+    test "within `bar` count (calls) <= 3" (simpleCountWithin "bar" "calls" Any (AtMost 3))
+    test "within `bar` count (calls `foo`) <= 3" (simpleCountWithin "bar" "calls" (Named "foo") (AtMost 3))
+    test "within `bar` count (calls something like `foo`) <= 3" (simpleCountWithin "bar" "calls" (Like "foo") (AtMost 3))
+    test "within `bar` count (calls something distinct of `foo`) <= 3" (simpleCountWithin "bar" "calls" (Except "foo") (AtMost 3))
+    test "within `bar` count (calls any of (`foo`, `bar`, `baz`)) <= 3" (simpleCountWithin "bar" "calls" (AnyOf ["foo", "bar", "baz"]) (AtMost 3))
 
-    test "within `bar` returns with 0" (simpleMatching (Within "bar") "returns" Any (Matching [IsNumber 0]))
-    test "within `bar` returns with \"hello\"" (simpleMatching (Within "bar") "returns" Any (Matching [IsString "hello"]))
-    test "within `bar` returns with `hello`" (simpleMatching (Within "bar") "returns" Any (Matching [IsSymbol "hello"]))
-    test "within `bar` returns with 'a'" (simpleMatching (Within "bar") "returns" Any (Matching [IsChar 'a']))
-    test "within `bar` returns with true" (simpleMatching (Within "bar") "returns" Any (Matching [IsTrue]))
-    test "within `bar` returns with false" (simpleMatching (Within "bar") "returns" Any (Matching [IsFalse]))
-    test "within `bar` returns with nil" (simpleMatching (Within "bar") "returns" Any (Matching [IsNil]))
-    test "within `bar` returns with self" (simpleMatching (Within "bar") "returns" Any (Matching [IsSelf]))
-    test "within `bar` returns with math" (simpleMatching (Within "bar") "returns" Any (Matching [IsMath]))
-    test "within `bar` returns with logic" (simpleMatching (Within "bar") "returns" Any (Matching [IsLogic]))
+    test "within `bar` returns with 0" (simpleMatchingWithin "bar" "returns" Any (Matching [IsNumber 0]))
+    test "within `bar` returns with \"hello\"" (simpleMatchingWithin "bar" "returns" Any (Matching [IsString "hello"]))
+    test "within `bar` returns with `hello`" (simpleMatchingWithin "bar" "returns" Any (Matching [IsSymbol "hello"]))
+    test "within `bar` returns with 'a'" (simpleMatchingWithin "bar" "returns" Any (Matching [IsChar 'a']))
+    test "within `bar` returns with true" (simpleMatchingWithin "bar" "returns" Any (Matching [IsTrue]))
+    test "within `bar` returns with false" (simpleMatchingWithin "bar" "returns" Any (Matching [IsFalse]))
+    test "within `bar` returns with nil" (simpleMatchingWithin "bar" "returns" Any (Matching [IsNil]))
+    test "within `bar` returns with self" (simpleMatchingWithin "bar" "returns" Any (Matching [IsSelf]))
+    test "within `bar` returns with math" (simpleMatchingWithin "bar" "returns" Any (Matching [IsMath]))
+    test "within `bar` returns with logic" (simpleMatchingWithin "bar" "returns" Any (Matching [IsLogic]))
 
-    test "within `bar` calls `foo` with (0, self)" (simpleMatching (Within "bar") "calls" (Named "foo") (Matching [IsNumber 0, IsSelf]))
-    test "within `bar` calls `foo` with (\"hello\", self)" (simpleMatching (Within "bar") "calls" (Named "foo") (Matching [IsString "hello", IsSelf]))
-    test "within `bar` calls `foo` with (`hello`, self)" (simpleMatching (Within "bar") "calls" (Named "foo") (Matching [IsSymbol "hello", IsSelf]))
-    test "within `bar` calls `foo` with ('a', self)" (simpleMatching (Within "bar") "calls" (Named "foo") (Matching [IsChar 'a', IsSelf]))
-    test "within `bar` calls `foo` with (true, self)" (simpleMatching (Within "bar") "calls" (Named "foo") (Matching [IsTrue, IsSelf]))
-    test "within `bar` calls `foo` with (false, self)" (simpleMatching (Within "bar") "calls" (Named "foo") (Matching [IsFalse, IsSelf]))
-    test "within `bar` calls `foo` with (nil, self)" (simpleMatching (Within "bar") "calls" (Named "foo") (Matching [IsNil, IsSelf]))
-    test "within `bar` calls `foo` with (self, self)" (simpleMatching (Within "bar") "calls" (Named "foo") (Matching [IsSelf, IsSelf]))
-    test "within `bar` calls `foo` with (math, self)" (simpleMatching (Within "bar") "calls" (Named "foo") (Matching [IsMath, IsSelf]))
-    test "within `bar` calls `foo` with (logic, self)" (simpleMatching (Within "bar") "calls" (Named "foo") (Matching [IsLogic, IsSelf]))
+    test "within `bar` calls `foo` with (0, self)" (simpleMatchingWithin "bar" "calls" (Named "foo") (Matching [IsNumber 0, IsSelf]))
+    test "within `bar` calls `foo` with (\"hello\", self)" (simpleMatchingWithin "bar" "calls" (Named "foo") (Matching [IsString "hello", IsSelf]))
+    test "within `bar` calls `foo` with (`hello`, self)" (simpleMatchingWithin "bar" "calls" (Named "foo") (Matching [IsSymbol "hello", IsSelf]))
+    test "within `bar` calls `foo` with ('a', self)" (simpleMatchingWithin "bar" "calls" (Named "foo") (Matching [IsChar 'a', IsSelf]))
+    test "within `bar` calls `foo` with (true, self)" (simpleMatchingWithin "bar" "calls" (Named "foo") (Matching [IsTrue, IsSelf]))
+    test "within `bar` calls `foo` with (false, self)" (simpleMatchingWithin "bar" "calls" (Named "foo") (Matching [IsFalse, IsSelf]))
+    test "within `bar` calls `foo` with (nil, self)" (simpleMatchingWithin "bar" "calls" (Named "foo") (Matching [IsNil, IsSelf]))
+    test "within `bar` calls `foo` with (self, self)" (simpleMatchingWithin "bar" "calls" (Named "foo") (Matching [IsSelf, IsSelf]))
+    test "within `bar` calls `foo` with (math, self)" (simpleMatchingWithin "bar" "calls" (Named "foo") (Matching [IsMath, IsSelf]))
+    test "within `bar` calls `foo` with (logic, self)" (simpleMatchingWithin "bar" "calls" (Named "foo") (Matching [IsLogic, IsSelf]))
 
     test "calls `foo` with something that (returns with math)" (
-      simpleMatching Anywhere "calls" (Named "foo") (Matching [That (simpleMatching Anywhere "returns" Any (Matching [IsMath]) )]))
+      simpleMatching "calls" (Named "foo") (Matching [That (simpleMatching "returns" Any (Matching [IsMath]) )]))
 
     test "declares `foo` that (returns with math)" (
-      simpleMatching Anywhere "declares" (Named "foo") (Matching [That (simpleMatching Anywhere "returns" Any (Matching [IsMath]) )]))
+      simpleMatching "declares" (Named "foo") (Matching [That (simpleMatching "returns" Any (Matching [IsMath]) )]))
 
     test "calls `foo` with (self, something that (returns with math))" (
-      simpleMatching Anywhere "calls" (Named "foo") (Matching [IsSelf, That (simpleMatching Anywhere "returns" Any (Matching [IsMath]) )]))
+      simpleMatching "calls" (Named "foo") (Matching [IsSelf, That (simpleMatching "returns" Any (Matching [IsMath]) )]))
 
     test "calls `foo` with (self, that (returns with math))" (
-      simpleMatching Anywhere "calls" (Named "foo") (Matching [IsSelf, That (simpleMatching Anywhere "returns" Any (Matching [IsMath]))]))
+      simpleMatching "calls" (Named "foo") (Matching [IsSelf, That (simpleMatching "returns" Any (Matching [IsMath]))]))
 
     test "calls `foo` with (self, something that (declares method `baz`))" (
-      simpleMatching Anywhere "calls" (Named "foo") (Matching [IsSelf, That (simple Anywhere "declares method" (Named "baz"))]))
+      simpleMatching "calls" (Named "foo") (Matching [IsSelf, That (simple "declares method" (Named "baz"))]))
 
   describe "parseTests" $ do
     let run = parseTests
     let test code expectation = it ("test " ++ code ++ " shouldBe " ++ show expectation) (run code `shouldBe` expectation)
 
-    test "test: declares class `Baz`" [simpleTest "E0" Anywhere "declares class" (Named "Baz")]
-    test "test: declares class `Baz`;" [simpleTest "E0" Anywhere "declares class" (Named "Baz")]
-    test "test: declares class `Baz`;\n" [simpleTest "E0" Anywhere "declares class" (Named "Baz")]
+    test "test: declares class `Baz`" [Test "E0" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching))]
+    test "test: declares class `Baz`;" [Test "E0" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching))]
+    test "test: declares class `Baz`;\n" [Test "E0" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching))]
 
     test "test: declares class `Baz`;\ntest: within `Baz` sends `foo`" [
-      simpleTest "E0" Anywhere "declares class" (Named "Baz"),
-      simpleTest "E1" (Within "Baz") "sends" (Named "foo")]
+      Test "E0" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching)),
+      Test "E1" (Within "Baz" (Inspection "sends" (Named "foo") Unmatching))]
     test "test: declares class `Baz`;\ntest: within `Baz` sends `foo`;" [
-      simpleTest "E0" Anywhere "declares class" (Named "Baz"),
-      simpleTest "E1" (Within "Baz") "sends" (Named "foo")]
+      Test "E0" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching)),
+      Test "E1" (Within "Baz" (Inspection "sends" (Named "foo") Unmatching))]
     test "test: declares class `Baz`;\n\
          \test : within `Baz`\n\
          \sends `foo`;\n" [
-           simpleTest "E0" Anywhere "declares class" (Named "Baz"),
-           simpleTest "E1" (Within "Baz") "sends" (Named "foo")]
+           Test "E0" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching)),
+           Test "E1" (Within "Baz" (Inspection "sends" (Named "foo") Unmatching))]
 
     test "test \"a test\":\n\
-         \  declares class `Baz`" [simpleTest "a test" Anywhere "declares class" (Named "Baz")]
+         \  declares class `Baz`" [Test "a test" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching))]
     test "test \"a test\":\n\
-         \  declares class `Baz`;" [simpleTest "a test" Anywhere "declares class" (Named "Baz")]
+         \  declares class `Baz`;" [Test "a test" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching))]
     test "test \"a test\":\n\
-         \  declares class `Baz`;\n" [simpleTest "a test" Anywhere "declares class" (Named "Baz")]
+         \  declares class `Baz`;\n" [Test "a test" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching))]
 
     test "test \"a test\":\n\
          \  declares class `Baz`;\n\
          \test \"another test\":\n\
          \  within `Baz` sends `foo`" [
-      simpleTest "a test" Anywhere "declares class" (Named "Baz"),
-      simpleTest "another test" (Within "Baz") "sends" (Named "foo")]
+      Test "a test" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching)),
+      Test "another test" (Within "Baz" (Inspection "sends" (Named "foo") Unmatching))]
     test "test \"a test\":\n\
          \  declares class `Baz`;\n\
          \test \"another test\":\n\
          \  within `Baz` sends `foo`;" [
-      simpleTest "a test" Anywhere "declares class" (Named "Baz"),
-      simpleTest "another test" (Within "Baz") "sends" (Named "foo")]
+      Test "a test" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching)),
+      Test "another test" (Within "Baz" (Inspection "sends" (Named "foo") Unmatching))]
     test "test \"a test\":\n\
          \  declares class `Baz`;\n\
          \test \"another test\":\n\
          \  within `Baz`\n\
          \  sends `foo`;\n" [
-           simpleTest "a test" Anywhere "declares class" (Named "Baz"),
-           simpleTest "another test" (Within "Baz") "sends" (Named "foo")]
+           Test "a test" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching)),
+           Test "another test" (Within "Baz" (Inspection "sends" (Named "foo") Unmatching))]
 
   describe "handles errors" $ do
     let run = either id (error.show) . parseTests'
@@ -180,12 +195,14 @@ spec = do
 
     test "test: declares class `Baz" "Lexical error"
     test "test: declares class `Baz` exoctly 3 times" "Parse Error: Unexpected keyword exoctly"
-    test "test: declares class `Baz` exactly 3 time" "Parse Error: Unexpected keyword time"
     test "test: declares class `Baz`\n within `Baz` sends `foo`" "Parse Error: within is not expected here"
     test "test: declares class of distinct `Baz`\n" "Parse Error: of is not expected here"
     test "test: declares class distinct `Baz`\n" "Parse Error: symbol Baz is not expected here"
     test "test: declares class `Baz` 3 times" "Parse Error: number 3.0 is not expected here"
-    test "test: declares class `Baz` not exactly 3 times" "Parse Error: not is not expected here"
+    test "test: declares class `Baz` ! = 3 times" "Parse Error: ! is not expected here"
     test "test: declares class `Baz`;\n\
          \test: Within `Baz`\n\
          \sends `foo`;\n" "Parse Error: Unexpected keyword sends"
+    test "(calls) or (returns)" "Parse Error: Unexpected )"
+    test "(count(calls) >= 3) and (count(returns) >= 4)" "Parse Error: Unexpected )"
+    test "(calls) and (returns)" "Parse Error: Unexpected )"
