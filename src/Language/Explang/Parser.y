@@ -18,7 +18,6 @@ import           Control.Monad.Error
 %token
 
   and { TAnd {} }
-  any { TAny {} }
   atLeast { TAtLeast {} }
   atMost { TAtMost {} }
   cand { TCAnd {} }
@@ -33,6 +32,7 @@ import           Control.Monad.Error
   exactly { TExactly {} }
   false { TFalse {} }
   identifier { TIdentifier {} }
+  in { TIn {} }
   like { TLike {} }
   logic { TLogic {} }
   math { TMath {} }
@@ -113,7 +113,8 @@ Predicate : { Any }
  | like symbol { (Like . symbolValue) $2 } -- relaxed syntax
  | something distinct of symbol { (Except . symbolValue) $4 }
  | distinct of symbol { (Except . symbolValue) $3 } -- relaxed syntax
- | any of openParen Symbols closeParen  { (AnyOf . map symbolValue) $4 }
+ | something in openParen Symbols closeParen  { (AnyOf . map symbolValue) $4 }
+ | in openParen Symbols closeParen  { (AnyOf . map symbolValue) $3 } -- relaxed syntax
 
 Symbols :: { [Token] }
 Symbols : symbol { [$1] }
@@ -152,7 +153,6 @@ m (TNumber v) = "number " ++ show v ++ " is not expected here"
 m (TString v) = "string " ++ show v ++ " is not expected here"
 m (TSymbol v) = "symbol " ++ v ++ " is not expected here"
 m TAnd = "and is not expected here"
-m TAny = "any is not expected here"
 m TAtLeast = "least is not expected here"
 m TAtMost = "most is not expected here"
 m TCAnd = "&& is not expected here"
@@ -165,6 +165,7 @@ m TDistinct = "distinct is not expected here"
 m TEOF = "Unexpected end of file"
 m TExactly = "exactly is not expected here"
 m TFalse = "false is not expected here"
+m TIn = "in is not expected here"
 m TLike = "like is not expected here"
 m TLogic = "logic is not expected here"
 m TMath = "math is not expected here"

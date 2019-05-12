@@ -27,36 +27,38 @@ spec = do
     test "calls `foo`" (simple "calls" (Named "foo"))
     test "calls something like `foo`" (simple "calls" (Like "foo"))
     test "calls something distinct of `foo`" (simple "calls" (Except "foo"))
-    test "calls any of (`foo`, `bar`, `baz`)" (simple "calls" (AnyOf ["foo", "bar", "baz"]))
+    test "calls something in (`foo`, `bar`, `baz`)" (simple "calls" (AnyOf ["foo", "bar", "baz"]))
 
     test "! calls" (simpleNegated "calls" Any)
     test "! calls `foo`" (simpleNegated "calls" (Named "foo"))
     test "! calls something like `foo`" (simpleNegated "calls" (Like "foo"))
     test "! calls something distinct of `foo`" (simpleNegated "calls" (Except "foo"))
-    test "! calls any of (`foo`, `bar`, `baz`)" (simpleNegated "calls" (AnyOf ["foo", "bar", "baz"]))
+    test "! calls something in (`foo`, `bar`, `baz`)" (simpleNegated "calls" (AnyOf ["foo", "bar", "baz"]))
 
     test "through `foobar` calls" (simpleThrough "foobar" "calls" Any)
     test "through `foobar` calls `foo`" (simpleThrough "foobar" "calls" (Named "foo"))
     test "through `foobar` calls something like `foo`" (simpleThrough "foobar" "calls" (Like "foo"))
     test "through `foobar` calls something distinct of `foo`" (simpleThrough "foobar" "calls" (Except "foo"))
-    test "through `foobar` calls any of (`foo`, `bar`, `baz`)" (simpleThrough "foobar" "calls" (AnyOf ["foo", "bar", "baz"]))
+    test "through `foobar` calls something in (`foo`, `bar`, `baz`)" (simpleThrough "foobar" "calls" (AnyOf ["foo", "bar", "baz"]))
 
     test "declares class like `Foo`" (simple "declares class" (Like "Foo"))
     test "declares class distinct of `Foo`" (simple "declares class" (Except "Foo"))
+    test "declares class in (`Foo`, `Bar`)" (simple "declares class" (AnyOf ["Foo", "Bar"]))
     test "declares method like `foo`" (simple "declares method" (Like "foo"))
     test "declares method distinct of `foo`" (simple "declares method" (Except "foo"))
+    test "declares method in (`foo`, `bar`)" (simple "declares method" (AnyOf ["foo", "bar"]))
 
     test "through `foobar` ! calls" (simpleNegatedThrough "foobar" "calls" Any)
     test "through `foobar` ! calls `foo`" (simpleNegatedThrough "foobar" "calls" (Named "foo"))
     test "through `foobar` ! calls something like `foo`" (simpleNegatedThrough "foobar" "calls" (Like "foo"))
     test "through `foobar` ! calls something distinct of `foo`" (simpleNegatedThrough "foobar" "calls" (Except "foo"))
-    test "through `foobar` ! calls any of (`foo`, `bar`, `baz`)" (simpleNegatedThrough "foobar" "calls" (AnyOf ["foo", "bar", "baz"]))
+    test "through `foobar` ! calls something in (`foo`, `bar`, `baz`)" (simpleNegatedThrough "foobar" "calls" (AnyOf ["foo", "bar", "baz"]))
 
     test "within `bar` ! calls" (simpleNegatedWithin "bar" "calls" Any)
     test "within `bar` ! calls `foo`" (simpleNegatedWithin "bar" "calls" (Named "foo"))
     test "within `bar` ! calls something like `foo`" (simpleNegatedWithin "bar" "calls" (Like "foo"))
     test "within `bar` ! calls something distinct of `foo`" (simpleNegatedWithin "bar" "calls" (Except "foo"))
-    test "within `bar` ! calls any of (`foo`, `bar`, `baz`)" (simpleNegatedWithin "bar" "calls" (AnyOf ["foo", "bar", "baz"]))
+    test "within `bar` ! calls something in (`foo`, `bar`, `baz`)" (simpleNegatedWithin "bar" "calls" (AnyOf ["foo", "bar", "baz"]))
 
     test "count (declares class `Baz`) = 3" (simpleCount "declares class" (Named "Baz") (Exactly 3))
 
@@ -78,7 +80,7 @@ spec = do
     test "within `bar` count (calls `foo`) = 3" (simpleCountWithin "bar" "calls" (Named "foo") (Exactly 3))
     test "within `bar` count (calls something like `foo`) = 3" (simpleCountWithin "bar" "calls" (Like "foo") (Exactly 3))
     test "within `bar` count (calls something distinct of `foo`) = 3" (simpleCountWithin "bar" "calls" (Except "foo") (Exactly 3))
-    test "within `bar` count (calls any of (`foo`, `bar`, `baz`)) = 3" (simpleCountWithin "bar" "calls" (AnyOf ["foo", "bar", "baz"]) (Exactly 3))
+    test "within `bar` count (calls something in (`foo`, `bar`, `baz`)) = 3" (simpleCountWithin "bar" "calls" (AnyOf ["foo", "bar", "baz"]) (Exactly 3))
 
     test "within `bar` (calls `foo`)" (run "within `bar` calls `foo`")
     test "within `bar` (calls `foo`) || (calls `foo`)" (run "within `bar` calls `foo` || calls `foo`")
@@ -97,13 +99,13 @@ spec = do
     test "within `bar` count (calls `foo`) >= 3" (simpleCountWithin "bar" "calls" (Named "foo") (AtLeast 3))
     test "within `bar` count (calls something like `foo`) >= 3" (simpleCountWithin "bar" "calls" (Like "foo") (AtLeast 3))
     test "within `bar` count (calls something distinct of `foo`) >= 3" (simpleCountWithin "bar" "calls" (Except "foo") (AtLeast 3))
-    test "within `bar` count (calls any of (`foo`, `bar`, `baz`)) >= 3" (simpleCountWithin "bar" "calls" (AnyOf ["foo", "bar", "baz"]) (AtLeast 3))
+    test "within `bar` count (calls something in (`foo`, `bar`, `baz`)) >= 3" (simpleCountWithin "bar" "calls" (AnyOf ["foo", "bar", "baz"]) (AtLeast 3))
 
     test "within `bar` count (calls) <= 3" (simpleCountWithin "bar" "calls" Any (AtMost 3))
     test "within `bar` count (calls `foo`) <= 3" (simpleCountWithin "bar" "calls" (Named "foo") (AtMost 3))
     test "within `bar` count (calls something like `foo`) <= 3" (simpleCountWithin "bar" "calls" (Like "foo") (AtMost 3))
     test "within `bar` count (calls something distinct of `foo`) <= 3" (simpleCountWithin "bar" "calls" (Except "foo") (AtMost 3))
-    test "within `bar` count (calls any of (`foo`, `bar`, `baz`)) <= 3" (simpleCountWithin "bar" "calls" (AnyOf ["foo", "bar", "baz"]) (AtMost 3))
+    test "within `bar` count (calls something in (`foo`, `bar`, `baz`)) <= 3" (simpleCountWithin "bar" "calls" (AnyOf ["foo", "bar", "baz"]) (AtMost 3))
 
     test "within `bar` returns with 0" (simpleMatchingWithin "bar" "returns" Any (Matching [IsNumber 0]))
     test "within `bar` returns with \"hello\"" (simpleMatchingWithin "bar" "returns" Any (Matching [IsString "hello"]))

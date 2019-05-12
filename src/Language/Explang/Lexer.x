@@ -78,10 +78,10 @@ tokens :-
   "="   { symbolToken TExactly }
 
   "and" { symbolToken TAnd }
-  "any" { symbolToken TAny }
   "count" { symbolToken TCount }
   "distinct" { symbolToken TDistinct }
   "false" { symbolToken TFalse }
+  "in" { symbolToken TIn }
   "like" { symbolToken TLike }
   "logic" { symbolToken TLogic }
   "math" { symbolToken TMath }
@@ -103,7 +103,6 @@ tokens :-
 {
 data Token
   = TAnd
-  | TAny
   | TAtLeast
   | TAtMost
   | TCAnd
@@ -119,6 +118,7 @@ data Token
   | TExactly
   | TFalse
   | TIdentifier { identifierValue :: String }
+  | TIn
   | TLeast
   | TLike
   | TLogic
