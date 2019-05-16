@@ -86,7 +86,7 @@ Query : within symbol CQuery { Within (symbolValue $2) $3 }
 
 CQuery :: { CQuery }
 CQuery : openParen CQuery closeParen { $2 }
-  | Inspection Predicate Matcher { Inspection $1 $2 $3 }
+  | Consult { let (i, p, m) = $1 in Inspection i p m }
   | cnot CQuery { CNot $2 }
   | CQuery cand CQuery { CAnd $1 $3 }
   | CQuery cor CQuery { COr $1 $3 }
@@ -96,7 +96,7 @@ CQuery : openParen CQuery closeParen { $2 }
 
 TQuery :: { TQuery }
 TQuery : openParen TQuery closeParen { $2 }
-  | count openParen Inspection Predicate Matcher closeParen { Counter $3 $4 $5 }
+  | count openParen Consult closeParen { let (i, p, m) = $3 in Counter i p m }
   | TQuery plus TQuery { Plus $1 $3 }
 
 Times :: { Int }
@@ -119,6 +119,9 @@ Keyword : and { "and" }
   | self { "self" }
   | test { "test" }
   | true { "true" }
+
+Consult :: { (String, Predicate, Matcher) }
+Consult : Inspection Predicate Matcher { ($1, $2, $3) }
 
 Predicate :: { Predicate }
 Predicate : { Any }
