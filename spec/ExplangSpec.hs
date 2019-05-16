@@ -129,6 +129,15 @@ spec = do
     test "within `bar` calls `foo` with (math, self)" (simpleMatchingWithin "bar" "calls" (Named "foo") (Matching [IsMath, IsSelf]))
     test "within `bar` calls `foo` with (logic, self)" (simpleMatchingWithin "bar" "calls" (Named "foo") (Matching [IsLogic, IsSelf]))
 
+    test "declares function like `total` that (uses not)" (simpleMatching "declares function" (Like "total") (Matching [That (simple "uses not" Any)]))
+    test "declares function like `total` that (uses logic)" (simpleMatching "declares function" (Like "total") (Matching [That (simple "uses logic" Any)]))
+    test "declares function like `total` that (uses math)" (simpleMatching "declares function" (Like "total") (Matching [That (simple "uses math" Any)]))
+
+    test "declares function like `total` that (returns that (uses math))" (
+      simpleMatching "declares function" (Like "total") (Matching [That (
+        simpleMatching "returns" Any (Matching [That (
+          simple "uses math" Any)]))]))
+
     test "calls `foo` with something that (returns with math)" (
       simpleMatching "calls" (Named "foo") (Matching [That (simpleMatching "returns" Any (Matching [IsMath]) )]))
 
@@ -196,6 +205,7 @@ spec = do
     let test code expectation = it ("test " ++ code ++ " shouldBe " ++ show expectation) (run code `shouldBe` expectation)
 
     test "test: declares class `Baz" "Lexical error"
+    test "test: declares function like `total` that (uses within)" "Parse Error: within is not expected here"
     test "test: declares class `Baz` exoctly 3 times" "Parse Error: Unexpected keyword exoctly"
     test "test: declares class `Baz`\n within `Baz` sends `foo`" "Parse Error: within is not expected here"
     test "test: declares class of distinct `Baz`\n" "Parse Error: of is not expected here"

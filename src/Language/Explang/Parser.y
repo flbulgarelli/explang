@@ -104,7 +104,21 @@ Times : number { round . numberValue $ $1 }
 
 Inspection :: { String }
 Inspection : identifier { identifierValue $1 }
+  | Keyword { $1 }
   | identifier Inspection { (identifierValue $1) ++ " " ++ $2 }
+
+Keyword :: { String }
+Keyword : and { "and" }
+  | count { "count" }
+  | false { "false" }
+  | logic { "logic" }
+  | math { "math" }
+  | nil { "nil" }
+  | not { "not" }
+  | or { "or" }
+  | self { "self" }
+  | test { "test" }
+  | true { "true" }
 
 Predicate :: { Predicate }
 Predicate : { Any }
