@@ -121,17 +121,15 @@ Keyword : and { "and" }
   | true { "true" }
 
 Consult :: { (String, Predicate, Matcher) }
-Consult : Inspection Predicate Matcher { ($1, $2, $3) }
+Consult : Inspection something Predicate Matcher { ($1, $3, $4) }
+  | Inspection Predicate Matcher { ($1, $2, $3) } -- relaxed syntax
 
 Predicate :: { Predicate }
 Predicate : { Any }
  | symbol { (Named . symbolValue) $1 }
- | something like symbol { (Like . symbolValue) $3 }
- | like symbol { (Like . symbolValue) $2 } -- relaxed syntax
- | something distinct of symbol { (Except . symbolValue) $4 }
- | distinct of symbol { (Except . symbolValue) $3 } -- relaxed syntax
- | something in openParen Symbols closeParen  { (AnyOf . map symbolValue) $4 }
- | in openParen Symbols closeParen  { (AnyOf . map symbolValue) $3 } -- relaxed syntax
+ | like symbol { (Like . symbolValue) $2 }
+ | distinct of symbol { (Except . symbolValue) $3 }
+ | in openParen Symbols closeParen  { (AnyOf . map symbolValue) $3 }
 
 Symbols :: { [Token] }
 Symbols : symbol { [$1] }

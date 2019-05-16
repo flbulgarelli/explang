@@ -29,6 +29,8 @@ spec = do
     test "calls something distinct of `foo`" (simple "calls" (Except "foo"))
     test "calls something in (`foo`, `bar`, `baz`)" (simple "calls" (AnyOf ["foo", "bar", "baz"]))
 
+    test "calls something" (run "calls")
+
     test "! calls" (simpleNegated "calls" Any)
     test "! calls `foo`" (simpleNegated "calls" (Named "foo"))
     test "! calls something like `foo`" (simpleNegated "calls" (Like "foo"))
@@ -137,6 +139,7 @@ spec = do
       simpleMatching "declares function" (Like "total") (Matching [That (
         simpleMatching "returns" Any (Matching [That (
           simple "uses math" Any)]))]))
+    test "declares function like `total` that (returns something that (uses math))" (run "declares function like `total` that (returns that (uses math))")
 
     test "calls `foo` with something that (returns with math)" (
       simpleMatching "calls" (Named "foo") (Matching [That (simpleMatching "returns" Any (Matching [IsMath]) )]))
