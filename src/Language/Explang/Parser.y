@@ -1,5 +1,5 @@
 {
-module Language.Explang.Parser (parse) where
+module Language.Explang.Parser (parseTests, parseExpectation) where
 
 import           Language.Explang.Expectation
 import           Language.Explang.Test
@@ -9,9 +9,11 @@ import qualified Language.Explang.Lexer as L
 import           Control.Monad.Error
 }
 
+%name parseTests       Tests
+%name parseExpectation Expectation
+
 %monad{L.P}
 %lexer{L.lexer}{L.TEOF}
-%name parse
 %tokentype{L.Token}
 %error {parseError}
 
