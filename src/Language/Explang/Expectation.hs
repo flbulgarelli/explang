@@ -11,7 +11,11 @@ module Language.Explang.Expectation (
 
 import GHC.Generics
 
-type Expectation = Query
+data Expectation =
+  Expectation {
+    name :: String,
+    query :: Query
+  } deriving (Eq, Show, Generic)
 
 data Query
   = Decontextualize CQuery
@@ -51,7 +55,7 @@ data Matcher
   deriving (Eq, Show, Generic)
 
 data Clause
-  = That Expectation
+  = That Query
   | IsNumber Double
   | IsString String
   | IsSymbol String

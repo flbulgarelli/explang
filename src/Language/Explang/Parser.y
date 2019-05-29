@@ -1,16 +1,15 @@
 {
-module Language.Explang.Parser (parseTests, parseExpectation) where
+module Language.Explang.Parser (parseExpectations, parseQuery) where
 
 import           Language.Explang.Expectation
-import           Language.Explang.Test
 import           Language.Explang.Lexer (Token( ..) )
 import qualified Language.Explang.Lexer as L
 
 import           Control.Monad.Error
 }
 
-%name parseTests       Tests
-%name parseExpectation Expectation
+%name parseExpectations Expectations
+%name parseQuery        TopQuery
 
 %monad{L.P}
 %lexer{L.lexer}{L.TEOF}
@@ -50,7 +49,7 @@ import           Control.Monad.Error
   something { TSomething {} }
   string { TString {} }
   symbol { TSymbol {} }
-  test { TTest {} }
+  expectation { TExpectation {} }
   that { TThat {} }
   through { TThrough {} }
   true { TTrue {} }
@@ -66,17 +65,17 @@ import           Control.Monad.Error
 %right cnot
 
 %%
-Tests :: { [Test] }
-Tests : { [] }
-  | Test { [$1] }
-  | Test semi Tests { $1:$3 }
-
-Test :: { Test }
-Test : test colon Expectation { Test "" $3 }
-  | test string colon Expectation { Test (stringValue $2) $4 }
+Expectations :: { [Expectation] }
+Expectations : { [] }
+  | Expectation { [$1] }
+  | Expectation semi Expectations { $1:$3 }
 
 Expectation :: { Expectation }
-Expectation : Query { $1 }
+Expectation : expectation colon TopQuery { Expectation "" $3 }
+  | expectation string colon TopQuery { Expectation (stringValue $2) $4 }
+
+TopQuery :: { Query }
+TopQuery : Query { $1 }
   | CQuery { Decontextualize $1 }
 
 Query :: { Query }
@@ -119,7 +118,7 @@ Keyword : and { "and" }
   | not { "not" }
   | or { "or" }
   | self { "self" }
-  | test { "test" }
+  | expectation { "expectation" }
   | true { "true" }
 
 Consult :: { (String, Predicate, Matcher) }
@@ -141,7 +140,7 @@ Matcher :: { Matcher }
 Matcher : { Unmatching }
   | with Clause { Matching [$2] }
   | with openParen Clauses closeParen { Matching $3 }
-  | that openParen Expectation closeParen { Matching [That $3] } -- relaxed syntax
+  | that openParen TopQuery closeParen { Matching [That $3] } -- relaxed syntax
 
 Clauses :: { [Clause] }
 Clauses : Clause { [$1] }
@@ -158,8 +157,8 @@ Clause : number { IsNumber . numberValue $ $1 }
   | math { IsMath }
   | logic { IsLogic }
   | nil { IsNil }
-  | something that openParen Expectation closeParen { That $4 }
-  | that openParen Expectation closeParen { That $3 } -- relaxed syntax
+  | something that openParen TopQuery closeParen { That $4 }
+  | that openParen TopQuery closeParen { That $3 } -- relaxed syntax
 
 {
 parseError token = throwError ("Parse Error: " ++ m token)

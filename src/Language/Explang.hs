@@ -1,32 +1,30 @@
 module Language.Explang (
+  parseQuery,
   parseExpectation,
-  parseTest,
-  parseTests,
-  parseTests',
-  module Language.Explang.Test) where
+  parseExpectations,
+  parseExpectations') where
 
 import           Codec.Binary.UTF8.String (encode)
 import           Language.Explang.Lexer (evalP)
 import qualified Language.Explang.Parser as P
 
-import           Language.Explang.Test
-import           Language.Explang.Expectation (Expectation)
+import           Language.Explang.Expectation (Query, Expectation(..))
 
-parseExpectation :: String -> Expectation
-parseExpectation = wrap P.parseExpectation
+parseQuery :: String -> Query
+parseQuery = wrap P.parseQuery
 
-parseTests :: String -> [Test]
-parseTests = zipWith overrideName [0..] . wrap P.parseTests
+parseExpectations :: String -> [Expectation]
+parseExpectations = zipWith overrideName [0..] . wrap P.parseExpectations
   where
-    overrideName :: Int -> Test -> Test
-    overrideName number e@Test { name = ""} = e { name = "E" ++ show number }
+    overrideName :: Int -> Expectation -> Expectation
+    overrideName number e@Expectation { name = ""} = e { name = "E" ++ show number }
     overrideName _      e                   = e
 
-parseTests' :: String -> Either String [Test]
-parseTests' = evalP P.parseTests . encode
+parseExpectations' :: String -> Either String [Expectation]
+parseExpectations' = evalP P.parseExpectations . encode
 
-parseTest :: String -> Test
-parseTest = head . parseTests
+parseExpectation :: String -> Expectation
+parseExpectation = head . parseExpectations
 
 
 wrap f = either error id . evalP f . encode

@@ -19,8 +19,8 @@ simpleMatching inspection binding matcher = (Decontextualize (Inspection inspect
 
 spec :: Spec
 spec = do
-  describe "parseExpectation" $ do
-    let run = parseExpectation :: String -> Expectation
+  describe "parseQuery" $ do
+    let run = parseQuery :: String -> Query
     let test code expectation = it ("test " ++ code ++ " shouldBe " ++ show expectation) (run code `shouldBe` expectation)
 
     test "calls" (simple "calls" Any)
@@ -156,67 +156,67 @@ spec = do
     test "calls `foo` with (self, something that (declares method `baz`))" (
       simpleMatching "calls" (Named "foo") (Matching [IsSelf, That (simple "declares method" (Named "baz"))]))
 
-  describe "parseTests" $ do
-    let run = parseTests
+  describe "parseExpectations" $ do
+    let run = parseExpectations
     let test code expectation = it ("test " ++ code ++ " shouldBe " ++ show expectation) (run code `shouldBe` expectation)
 
-    test "test: declares class `Baz`" [Test "E0" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching))]
-    test "test: declares class `Baz`;" [Test "E0" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching))]
-    test "test: declares class `Baz`;\n" [Test "E0" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching))]
+    test "expectation: declares class `Baz`" [Expectation "E0" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching))]
+    test "expectation: declares class `Baz`;" [Expectation "E0" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching))]
+    test "expectation: declares class `Baz`;\n" [Expectation "E0" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching))]
 
-    test "test: declares class `Baz`;\ntest: within `Baz` sends `foo`" [
-      Test "E0" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching)),
-      Test "E1" (Within "Baz" (Inspection "sends" (Named "foo") Unmatching))]
-    test "test: declares class `Baz`;\ntest: within `Baz` sends `foo`;" [
-      Test "E0" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching)),
-      Test "E1" (Within "Baz" (Inspection "sends" (Named "foo") Unmatching))]
-    test "test: declares class `Baz`;\n\
-         \test : within `Baz`\n\
+    test "expectation: declares class `Baz`;\nexpectation: within `Baz` sends `foo`" [
+      Expectation "E0" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching)),
+      Expectation "E1" (Within "Baz" (Inspection "sends" (Named "foo") Unmatching))]
+    test "expectation: declares class `Baz`;\nexpectation: within `Baz` sends `foo`;" [
+      Expectation "E0" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching)),
+      Expectation "E1" (Within "Baz" (Inspection "sends" (Named "foo") Unmatching))]
+    test "expectation: declares class `Baz`;\n\
+         \expectation: within `Baz`\n\
          \sends `foo`;\n" [
-           Test "E0" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching)),
-           Test "E1" (Within "Baz" (Inspection "sends" (Named "foo") Unmatching))]
+           Expectation "E0" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching)),
+           Expectation "E1" (Within "Baz" (Inspection "sends" (Named "foo") Unmatching))]
 
-    test "test \"a test\":\n\
-         \  declares class `Baz`" [Test "a test" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching))]
-    test "test \"a test\":\n\
-         \  declares class `Baz`;" [Test "a test" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching))]
-    test "test \"a test\":\n\
-         \  declares class `Baz`;\n" [Test "a test" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching))]
+    test "expectation \"a test\":\n\
+         \  declares class `Baz`" [Expectation "a test" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching))]
+    test "expectation \"a test\":\n\
+         \  declares class `Baz`;" [Expectation "a test" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching))]
+    test "expectation \"a test\":\n\
+         \  declares class `Baz`;\n" [Expectation "a test" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching))]
 
-    test "test \"a test\":\n\
+    test "expectation \"a test\":\n\
          \  declares class `Baz`;\n\
-         \test \"another test\":\n\
+         \expectation \"another test\":\n\
          \  within `Baz` sends `foo`" [
-      Test "a test" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching)),
-      Test "another test" (Within "Baz" (Inspection "sends" (Named "foo") Unmatching))]
-    test "test \"a test\":\n\
+      Expectation "a test" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching)),
+      Expectation "another test" (Within "Baz" (Inspection "sends" (Named "foo") Unmatching))]
+    test "expectation \"a test\":\n\
          \  declares class `Baz`;\n\
-         \test \"another test\":\n\
+         \expectation \"another test\":\n\
          \  within `Baz` sends `foo`;" [
-      Test "a test" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching)),
-      Test "another test" (Within "Baz" (Inspection "sends" (Named "foo") Unmatching))]
-    test "test \"a test\":\n\
+      Expectation "a test" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching)),
+      Expectation "another test" (Within "Baz" (Inspection "sends" (Named "foo") Unmatching))]
+    test "expectation \"a test\":\n\
          \  declares class `Baz`;\n\
-         \test \"another test\":\n\
+         \expectation \"another test\":\n\
          \  within `Baz`\n\
          \  sends `foo`;\n" [
-           Test "a test" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching)),
-           Test "another test" (Within "Baz" (Inspection "sends" (Named "foo") Unmatching))]
+           Expectation "a test" (Decontextualize (Inspection "declares class" (Named "Baz") Unmatching)),
+           Expectation "another test" (Within "Baz" (Inspection "sends" (Named "foo") Unmatching))]
 
   describe "handles errors" $ do
-    let run = either id (error.show) . parseTests'
+    let run = either id (error.show) . parseExpectations'
     let test code expectation = it ("test " ++ code ++ " shouldBe " ++ show expectation) (run code `shouldBe` expectation)
 
-    test "test: declares class `Baz" "Lexical error"
-    test "test: declares function like `total` that (uses within)" "Parse Error: within is not expected here"
-    test "test: declares class `Baz` exoctly 3 times" "Parse Error: Unexpected keyword exoctly"
-    test "test: declares class `Baz`\n within `Baz` sends `foo`" "Parse Error: within is not expected here"
-    test "test: declares class of distinct `Baz`\n" "Parse Error: of is not expected here"
-    test "test: declares class distinct `Baz`\n" "Parse Error: symbol Baz is not expected here"
-    test "test: declares class `Baz` 3 times" "Parse Error: number 3.0 is not expected here"
-    test "test: declares class `Baz` ! = 3 times" "Parse Error: ! is not expected here"
-    test "test: declares class `Baz`;\n\
-         \test: Within `Baz`\n\
+    test "expectation: declares class `Baz" "Lexical error"
+    test "expectation: declares function like `total` that (uses within)" "Parse Error: within is not expected here"
+    test "expectation: declares class `Baz` exoctly 3 times" "Parse Error: Unexpected keyword exoctly"
+    test "expectation: declares class `Baz`\n within `Baz` sends `foo`" "Parse Error: within is not expected here"
+    test "expectation: declares class of distinct `Baz`\n" "Parse Error: of is not expected here"
+    test "expectation: declares class distinct `Baz`\n" "Parse Error: symbol Baz is not expected here"
+    test "expectation: declares class `Baz` 3 times" "Parse Error: number 3.0 is not expected here"
+    test "expectation: declares class `Baz` ! = 3 times" "Parse Error: ! is not expected here"
+    test "expectation: declares class `Baz`;\n\
+         \expectation: Within `Baz`\n\
          \sends `foo`;\n" "Parse Error: Unexpected keyword sends"
     test "(calls) or (returns)" "Parse Error: Unexpected )"
     test "(count(calls) >= 3) and (count(returns) >= 4)" "Parse Error: Unexpected )"
