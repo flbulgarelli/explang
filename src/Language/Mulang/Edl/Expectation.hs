@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 
-module Language.Explang.Expectation (
+module Language.Mulang.Edl.Expectation (
   Expectation (..),
   Matcher (..),
   Predicate (..),

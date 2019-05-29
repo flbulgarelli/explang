@@ -1,5 +1,5 @@
 {
-module Language.Explang.Lexer (Token(..),P,evalP,lexer, tokens) where
+module Language.Mulang.Edl.Lexer (Token(..),P,evalP,lexer, tokens) where
 import Control.Monad.State
 import Control.Monad.Except
 import Data.Word

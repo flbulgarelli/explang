@@ -1,8 +1,8 @@
-module ExplangSpec (spec) where
+module EdlSpec (spec) where
 
 import Test.Hspec hiding (Expectation)
-import Language.Explang
-import Language.Explang.Expectation
+import Language.Mulang.Edl
+import Language.Mulang.Edl.Expectation
 
 
 simple inspection binding = simpleMatching inspection binding Unmatching

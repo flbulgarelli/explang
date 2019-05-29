@@ -1,9 +1,9 @@
 {
-module Language.Explang.Parser (parseExpectations, parseQuery) where
+module Language.Mulang.Edl.Parser (parseExpectations, parseQuery) where
 
-import           Language.Explang.Expectation
-import           Language.Explang.Lexer (Token( ..) )
-import qualified Language.Explang.Lexer as L
+import           Language.Mulang.Edl.Expectation
+import           Language.Mulang.Edl.Lexer (Token( ..) )
+import qualified Language.Mulang.Edl.Lexer as L
 
 import           Control.Monad.Error
 }

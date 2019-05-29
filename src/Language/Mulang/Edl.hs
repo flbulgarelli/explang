@@ -1,14 +1,14 @@
-module Language.Explang (
+module Language.Mulang.Edl (
   parseQuery,
   parseExpectation,
   parseExpectations,
   parseExpectations') where
 
 import           Codec.Binary.UTF8.String (encode)
-import           Language.Explang.Lexer (evalP)
-import qualified Language.Explang.Parser as P
+import           Language.Mulang.Edl.Lexer (evalP)
+import qualified Language.Mulang.Edl.Parser as P
 
-import           Language.Explang.Expectation (Query, Expectation(..))
+import           Language.Mulang.Edl.Expectation (Query, Expectation(..))
 
 parseQuery :: String -> Query
 parseQuery = wrap P.parseQuery
